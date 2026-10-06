@@ -4,7 +4,9 @@
   "type": "module",
   "license": "AGPL-3.0-only",
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "exports": {
     ".": {
@@ -14,10 +16,19 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "prepack": "pnpm build && cp ../../LICENSE LICENSE"
   },
   "dependencies": {
     "@openquotestack/schema": "workspace:*",
     "@openquotestack/engine": "workspace:*"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ReVG08/OpenQuoteStack.git",
+    "directory": "packages/sdk"
   }
 }
