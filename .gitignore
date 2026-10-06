@@ -13,3 +13,4 @@ playwright-report/
 test-results/
 .local/
 packages/*/LICENSE
+**/next-env.d.ts

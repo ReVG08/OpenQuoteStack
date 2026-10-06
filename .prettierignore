@@ -7,3 +7,4 @@ coverage
 packages/database/src/generated
 LICENSE
 .local
+**/next-env.d.ts
