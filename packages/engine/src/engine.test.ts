@@ -315,6 +315,27 @@ describe("pricing", () => {
     ).toBeUndefined();
   });
 });
+it("retains execution order when adjustments precede later charges", () => {
+  const result = calculateEstimate(
+    definition(
+      [
+        fixed(100),
+        {
+          id: "adjust",
+          label: "Adjustment",
+          type: "percentage",
+          percent: "10",
+          basis: "subtotal",
+        },
+        unit,
+      ],
+      { minimumMinor: 1000 },
+    ),
+    { quantity: 1 },
+  );
+  expect(result.appliedRules).toEqual(["base", "adjust", "unit", "$minimum"]);
+  expect(result.adjustments[0]?.parameters.basisMinor).toBe(100);
+});
 describe("conditions", () => {
   it.each([
     ["equals", "hello", "hello", true],

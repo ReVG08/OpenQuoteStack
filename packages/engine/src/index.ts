@@ -142,6 +142,7 @@ export function calculateEstimate(
     if (typeof v === "number") variables[k] = decimal(v);
   let subtotalMinor = 0,
     totalMinor = 0;
+  const appliedRules: string[] = [];
   const lineItems: RuleTrace[] = [],
     adjustments: RuleTrace[] = [];
   for (const rule of estimator.rules) {
@@ -221,6 +222,7 @@ export function calculateEstimate(
       }
     }
     const amountMinor = round(amount);
+    appliedRules.push(rule.id);
     const trace: RuleTrace = {
       ruleId: rule.id,
       label: rule.label,
@@ -247,6 +249,7 @@ export function calculateEstimate(
       bound !== undefined &&
       (operation === "minimum" ? totalMinor < bound : totalMinor > bound)
     ) {
+      appliedRules.push(`$${operation}`);
       adjustments.push({
         ruleId: `$${operation}`,
         label: operation === "minimum" ? "Minimum price" : "Maximum price",
@@ -272,7 +275,7 @@ export function calculateEstimate(
     totalMinor,
     lineItems,
     adjustments,
-    appliedRules: [...lineItems, ...adjustments].map((t) => t.ruleId),
+    appliedRules,
     ...(range
       ? {
           range: {
