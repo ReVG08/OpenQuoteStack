@@ -1,0 +1,171 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+datasource db {
+  provider = "postgresql"
+}
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  memberships   Membership[]
+}
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+}
+model Account {
+  id                    String @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  @@unique([providerId, accountId])
+  @@index([userId])
+}
+model Verification {
+  id         String @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@index([identifier])
+}
+enum Role {
+  owner
+  admin
+  sales
+  viewer
+}
+enum EstimatorStatus {
+  draft
+  published
+  archived
+}
+enum EstimateStatus {
+  completed
+  accepted
+  declined
+}
+model Organization {
+  id              String @id @default(cuid())
+  name            String
+  slug            String @unique
+  locale          String @default("en")
+  timezone        String @default("UTC")
+  defaultCurrency String @default("USD")
+  branding        Json @default("{}")
+  createdAt       DateTime @default(now())
+  memberships     Membership[]
+  estimators      Estimator[]
+  revisions       EstimatorRevision[]
+  estimates       Estimate[]
+  leads           Lead[]
+  auditEntries    AuditEntry[]
+}
+model Membership {
+  id             String @id @default(cuid())
+  organizationId String
+  userId         String
+  role           Role @default(viewer)
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+model Estimator {
+  id                  String @id @default(cuid())
+  organizationId      String
+  name                String
+  status              EstimatorStatus @default(draft)
+  publishedRevisionId String? @unique
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  revisions           EstimatorRevision[] @relation("Revisions")
+  publishedRevision   EstimatorRevision? @relation("PublishedRevision", fields: [publishedRevisionId, organizationId, id], references: [id, organizationId, estimatorId], onDelete: NoAction, onUpdate: NoAction)
+  @@unique([id, organizationId])
+  @@unique([publishedRevisionId, organizationId, id])
+  @@index([organizationId, status])
+}
+model EstimatorRevision {
+  id             String @id @default(cuid())
+  organizationId String
+  estimatorId    String
+  number         Int
+  definition     Json
+  contentHash    String
+  createdBy      String
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  estimator      Estimator @relation("Revisions", fields: [estimatorId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  publishedBy    Estimator? @relation("PublishedRevision")
+  estimates      Estimate[]
+  @@unique([estimatorId, number])
+  @@unique([id, organizationId, estimatorId])
+  @@index([organizationId])
+}
+model Estimate {
+  id             String @id @default(cuid())
+  organizationId String
+  estimatorId    String
+  revisionId     String
+  answers        Json
+  result         Json
+  engineVersion  String
+  status         EstimateStatus @default(completed)
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  revision       EstimatorRevision @relation(fields: [revisionId, organizationId, estimatorId], references: [id, organizationId, estimatorId], onDelete: Restrict)
+  lead           Lead?
+  @@unique([id, organizationId])
+  @@index([organizationId, createdAt])
+}
+model Lead {
+  id             String @id @default(cuid())
+  organizationId String
+  estimateId     String @unique
+  name           String
+  email          String
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  estimate       Estimate @relation(fields: [estimateId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  @@unique([estimateId, organizationId])
+  @@index([organizationId])
+}
+model AuditEntry {
+  id             String @id @default(cuid())
+  organizationId String
+  actorId        String
+  action         String
+  resourceId     String
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  @@index([organizationId, createdAt])
+}

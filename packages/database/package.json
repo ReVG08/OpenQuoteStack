@@ -1,0 +1,30 @@
+{
+  "name": "@openquotestack/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./services": "./src/services.ts"
+  },
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "prisma migrate deploy",
+    "seed": "tsx prisma/seed.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "7.10.0",
+    "@prisma/adapter-pg": "7.10.0",
+    "pg": "^8.18.0",
+    "@openquotestack/schema": "workspace:*",
+    "@openquotestack/engine": "workspace:*",
+    "@openquotestack/core": "workspace:*",
+    "dotenv": "^17.3.0"
+  },
+  "devDependencies": {
+    "prisma": "7.10.0",
+    "@types/pg": "^8.16.0"
+  },
+  "license": "AGPL-3.0-only"
+}

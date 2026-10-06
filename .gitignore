@@ -11,3 +11,5 @@ coverage/
 packages/database/src/generated/
 playwright-report/
 test-results/
+.local/
+packages/*/LICENSE

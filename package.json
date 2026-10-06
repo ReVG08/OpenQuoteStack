@@ -7,24 +7,32 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "dev": "pnpm --filter @openquotestack/web dev",
+    "dev": "pnpm db:generate && turbo build --filter=@openquotestack/engine --filter=@openquotestack/core && pnpm --filter @openquotestack/web dev",
     "build": "pnpm db:generate && turbo build",
-    "typecheck": "pnpm db:generate && turbo typecheck",
+    "typecheck": "pnpm db:generate && turbo typecheck && pnpm typecheck:tools",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run --exclude '**/*.integration.test.ts'",
+    "test": "turbo build --filter=@openquotestack/engine --filter=@openquotestack/core --filter=@openquotestack/sdk && vitest run --exclude '**/*.integration.test.ts'",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "db:generate": "pnpm --filter @openquotestack/database generate",
     "db:migrate": "pnpm --filter @openquotestack/database migrate",
-    "db:seed": "pnpm --filter @openquotestack/database seed",
-    "example": "tsx examples/calculate-moving.ts"
+    "db:seed": "pnpm db:generate && turbo build --filter=@openquotestack/engine --filter=@openquotestack/core && pnpm --filter @openquotestack/database seed",
+    "example": "turbo build --filter=@openquotestack/engine && tsx examples/calculate-moving.ts",
+    "test:database": "pnpm db:generate && turbo build --filter=@openquotestack/engine --filter=@openquotestack/core && tsx scripts/test-database.ts",
+    "db:local": "tsx scripts/local-database.ts",
+    "typecheck:tools": "tsc --noEmit -p tsconfig.tools.json"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.0",
+    "@eslint/js": "^9.39.5",
+    "@openquotestack/core": "workspace:*",
+    "@openquotestack/engine": "workspace:*",
+    "@openquotestack/schema": "workspace:*",
+    "@openquotestack/sdk": "workspace:*",
     "@types/node": "^24.0.0",
+    "agent-browser": "^0.38.2",
     "embedded-postgres": "18.4.0-beta.17",
-    "eslint": "^9.39.0",
+    "eslint": "^9.39.5",
     "eslint-config-next": "16.3.8",
     "prettier": "^3.8.0",
     "tsx": "^4.21.0",
@@ -33,5 +41,6 @@
     "typescript-eslint": "^8.56.0",
     "vitest": "5.0.3"
   },
-  "type": "module"
+  "type": "module",
+  "license": "AGPL-3.0-only"
 }

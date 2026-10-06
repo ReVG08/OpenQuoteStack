@@ -14,7 +14,19 @@ export default ts.config(
   },
   js.configs.recommended,
   ...ts.configs.recommended,
-  { files: ["apps/web/**/*.{ts,tsx}"], extends: [next] },
+  {
+    rules: {
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
+    },
+  },
+  {
+    files: ["apps/web/**/*.{ts,tsx}"],
+    extends: [next],
+    settings: { next: { rootDir: "apps/web" } },
+  },
   {
     files: ["**/*.mjs"],
     languageOptions: { globals: { process: "readonly" } },

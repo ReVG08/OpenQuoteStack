@@ -1,0 +1,5 @@
+{
+  "extends": "./packages/config/tsconfig.json",
+  "compilerOptions": { "noEmit": true },
+  "include": ["scripts/**/*.ts", "examples/**/*.ts", "vitest*.ts"]
+}
