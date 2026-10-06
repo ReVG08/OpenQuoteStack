@@ -1,0 +1,37 @@
+{
+  "name": "openquotestack",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.34.6",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @openquotestack/web dev",
+    "build": "pnpm db:generate && turbo build",
+    "typecheck": "pnpm db:generate && turbo typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run --exclude '**/*.integration.test.ts'",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "db:generate": "pnpm --filter @openquotestack/database generate",
+    "db:migrate": "pnpm --filter @openquotestack/database migrate",
+    "db:seed": "pnpm --filter @openquotestack/database seed",
+    "example": "tsx examples/calculate-moving.ts"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^24.0.0",
+    "embedded-postgres": "18.4.0-beta.17",
+    "eslint": "^9.39.0",
+    "eslint-config-next": "16.3.8",
+    "prettier": "^3.8.0",
+    "tsx": "^4.21.0",
+    "turbo": "^2.8.0",
+    "typescript": "^5.9.0",
+    "typescript-eslint": "^8.56.0",
+    "vitest": "5.0.3"
+  },
+  "type": "module"
+}

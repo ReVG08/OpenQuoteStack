@@ -1,0 +1,191 @@
+{
+  "schemaVersion": "1",
+  "template": {
+    "id": "moving-company",
+    "name": "Moving Cost Calculator",
+    "category": "moving",
+    "version": "1.0.0"
+  },
+  "estimator": {
+    "id": "moving-company",
+    "name": "Moving Cost Calculator",
+    "description": "A sample estimate using manually supplied distance.",
+    "locale": "en",
+    "currency": {
+      "code": "USD",
+      "minorUnits": 2
+    },
+    "steps": [
+      {
+        "id": "move",
+        "title": "Tell us about your move",
+        "fields": [
+          {
+            "id": "origin",
+            "label": "Origin",
+            "type": "text",
+            "required": true
+          },
+          {
+            "id": "destination",
+            "label": "Destination",
+            "type": "text",
+            "required": true
+          },
+          {
+            "id": "bedrooms",
+            "label": "Bedrooms",
+            "type": "number",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 20,
+              "integer": true
+            }
+          },
+          {
+            "id": "distance",
+            "label": "Distance (miles)",
+            "type": "number",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 5000
+            }
+          },
+          {
+            "id": "elevator",
+            "label": "Elevator available",
+            "type": "boolean",
+            "required": true
+          },
+          {
+            "id": "floors",
+            "label": "Flights of stairs",
+            "type": "number",
+            "validation": {
+              "min": 0,
+              "max": 50,
+              "integer": true
+            },
+            "visibleWhen": {
+              "field": "elevator",
+              "op": "equals",
+              "value": false
+            }
+          },
+          {
+            "id": "boxes",
+            "label": "Boxes",
+            "type": "number",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 500,
+              "integer": true
+            }
+          },
+          {
+            "id": "piano",
+            "label": "Piano handling",
+            "type": "boolean",
+            "required": true
+          },
+          {
+            "id": "packing",
+            "label": "Packing required",
+            "type": "boolean",
+            "required": true
+          },
+          {
+            "id": "moving_date",
+            "label": "Moving date",
+            "type": "date",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "constants": {},
+    "rules": [
+      {
+        "id": "base",
+        "label": "Base moving service",
+        "type": "fixed",
+        "amountMinor": 18000
+      },
+      {
+        "id": "bedrooms",
+        "label": "Bedroom handling",
+        "type": "per_unit",
+        "field": "bedrooms",
+        "rateMinor": 8000
+      },
+      {
+        "id": "distance",
+        "label": "Travel distance",
+        "type": "per_unit",
+        "field": "distance",
+        "rateMinor": 210
+      },
+      {
+        "id": "stairs",
+        "label": "Stairs",
+        "type": "per_unit",
+        "field": "floors",
+        "rateMinor": 3500,
+        "when": {
+          "field": "elevator",
+          "op": "equals",
+          "value": false
+        }
+      },
+      {
+        "id": "boxes",
+        "label": "Box handling",
+        "type": "per_unit",
+        "field": "boxes",
+        "rateMinor": 350
+      },
+      {
+        "id": "piano",
+        "label": "Piano handling",
+        "type": "fixed",
+        "amountMinor": 15000,
+        "when": {
+          "field": "piano",
+          "op": "equals",
+          "value": true
+        }
+      },
+      {
+        "id": "packing",
+        "label": "Packing service",
+        "type": "fixed",
+        "amountMinor": 10000,
+        "when": {
+          "field": "packing",
+          "op": "equals",
+          "value": true
+        }
+      },
+      {
+        "id": "weekend",
+        "label": "Weekend surcharge",
+        "type": "date_weekday",
+        "field": "moving_date",
+        "days": [0, 6],
+        "percent": "15",
+        "basis": "subtotal"
+      }
+    ],
+    "output": {
+      "minimumMinor": 35000,
+      "range": {
+        "belowPercent": "5",
+        "abovePercent": "5"
+      },
+      "message": "An estimate for planning. Confirm access, inventory and service details with the mover."
+    }
+  }
+}
