@@ -55,7 +55,8 @@ division take precedence. Operations of equal precedence associate left to right
 There are no calls, property access, assignments, executable code or implicit casts.
 Variables resolve to numeric answers or declared decimal-string constants.
 Formula results represent minor units, not major currency units. Unknown variables,
-division by zero and unsafe totals fail. Definition size and depth are bounded.
+division by zero and unsafe totals fail. Definition size and depth are bounded. Rational numerators and denominators are
+limited to 512 characters to bound arithmetic work.
 
 Results retain rule identifiers, labels, inputs, operation parameters, rounded
 amounts, effective answers and engine version. Persist the result and immutable

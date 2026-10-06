@@ -336,6 +336,49 @@ it("retains execution order when adjustments precede later charges", () => {
   expect(result.appliedRules).toEqual(["base", "adjust", "unit", "$minimum"]);
   expect(result.adjustments[0]?.parameters.basisMinor).toBe(100);
 });
+it("resolves declared decimal constants and rounds discounts away from zero", () => {
+  const d = definition([fixed(0)]);
+  d.constants = { rate: "80.25" };
+  d.rules = [
+    {
+      id: "formula",
+      label: "Formula",
+      type: "formula",
+      expression: parseFormula("quantity * rate * 100"),
+    },
+  ];
+  expect(calculateEstimate(d, { quantity: 3 }).totalMinor).toBe(24075);
+  const discounted = definition([
+    fixed(1001),
+    {
+      id: "discount",
+      label: "Discount",
+      type: "percentage",
+      percent: "-0.05",
+      basis: "subtotal",
+    },
+  ]);
+  expect(
+    calculateEstimate(discounted, { quantity: 0 }).adjustments[0]?.amountMinor,
+  ).toBe(-1);
+});
+it("bounds arithmetic work for deeply multiplied formulas", () => {
+  let expression: import("@openquotestack/schema").Formula = {
+    value: "999999999999999",
+  };
+  for (let i = 0; i < 40; i++)
+    expression = {
+      op: "*",
+      left: expression,
+      right: { value: "999999999999999" },
+    };
+  expect(() =>
+    calculateEstimate(
+      definition([{ id: "huge", label: "Huge", type: "formula", expression }]),
+      { quantity: 1 },
+    ),
+  ).toThrow("complexity limits");
+});
 describe("conditions", () => {
   it.each([
     ["equals", "hello", "hello", true],

@@ -4,6 +4,8 @@ const gcd = (a: bigint, b: bigint): bigint =>
   b === 0n ? (a < 0n ? -a : a) : gcd(b, a % b);
 export function rational(n: bigint, d = 1n): Rational {
   if (d === 0n) throw new Error("Division by zero");
+  if (n.toString().length > 512 || d.toString().length > 512)
+    throw new Error("Arithmetic exceeds complexity limits");
   if (d < 0n) {
     n = -n;
     d = -d;
