@@ -10,6 +10,7 @@ export default ts.config(
       "**/generated/**",
       "**/next-env.d.ts",
       "**/.turbo/**",
+      ".local/**",
     ],
   },
   js.configs.recommended,

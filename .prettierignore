@@ -6,3 +6,4 @@ dist
 coverage
 packages/database/src/generated
 LICENSE
+.local

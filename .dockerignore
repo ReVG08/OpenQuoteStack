@@ -1,0 +1,13 @@
+.git
+node_modules
+**/node_modules
+**/.next
+**/dist
+**/.turbo
+**/generated
+.local
+.env
+.env.*
+!.env.example
+coverage
+test-results
