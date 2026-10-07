@@ -262,3 +262,110 @@ describe("revision lifecycle", () => {
     await svc.publishRevision(alice, orgA, estimatorA, revisionA);
   });
 });
+
+it("keeps draft edits private and publishes a new immutable revision", async () => {
+  const { estimator, revision } = await svc.createEstimator(
+    alice,
+    orgA,
+    sample(),
+  );
+  await svc.publishDraft(alice, orgA, estimator.id, 0);
+  const first = await svc.createEstimate(alice, orgA, estimator.id, answers);
+  const draft = sample();
+  draft.estimator.rules[0].amountMinor = 20000;
+  const version = await svc.saveDraft(alice, orgA, estimator.id, draft, 0);
+  expect(
+    (await svc.createEstimate(alice, orgA, estimator.id, answers)).result,
+  ).toEqual(first.result);
+  await expect(
+    svc.saveDraft(alice, orgA, estimator.id, draft, 0),
+  ).rejects.toThrow("another window");
+  await expect(
+    svc.saveDraft(bob, orgA, estimator.id, draft, version),
+  ).rejects.toBeInstanceOf(AccessDeniedError);
+  const next = await svc.publishDraft(alice, orgA, estimator.id, version);
+  expect(next.number).toBe(2);
+  expect((await svc.getEstimate(alice, orgA, first.id)).revisionId).toBe(
+    revision.id,
+  );
+});
+it("pins anonymous submissions to their viewed revision and stores contact atomically", async () => {
+  const doc = sample();
+  doc.estimator.leadCapture.mode = "before";
+  const { estimator } = await svc.createEstimator(alice, orgA, doc);
+  const revision = await svc.publishDraft(alice, orgA, estimator.id, 0);
+  const session = await svc.beginPublicSession(
+    "tenant-a",
+    estimator.id,
+    revision.id,
+  );
+  await svc.progressPublicSession(session.id, 1);
+  await expect(svc.submitPublicEstimate(session.id, answers)).rejects.toThrow(
+    "required",
+  );
+  const changed = sample();
+  changed.estimator.rules[0].amountMinor = 99999;
+  const version = await svc.saveDraft(alice, orgA, estimator.id, changed, 0);
+  await svc.publishDraft(alice, orgA, estimator.id, version);
+  const quote = await svc.submitPublicEstimate(session.id, answers, {
+    name: "Taylor Example",
+    email: "taylor@example.test",
+  });
+  expect(quote.revisionId).toBe(revision.id);
+  expect(quote.lead?.name).toBe("Taylor Example");
+  expect(
+    (
+      await svc.submitPublicEstimate(session.id, answers, {
+        name: "Other",
+        email: "other@example.test",
+      })
+    ).id,
+  ).toBe(quote.id);
+  await expect(svc.getEstimate(bob, orgA, quote.id)).rejects.toBeInstanceOf(
+    AccessDeniedError,
+  );
+  await expect(
+    svc.updateEstimate(bob, orgA, quote.id, "won", "secret"),
+  ).rejects.toBeInstanceOf(AccessDeniedError);
+  await svc.updateEstimate(
+    alice,
+    orgA,
+    quote.id,
+    "qualified",
+    "Check access before confirming.",
+  );
+  const updated = await svc.getEstimate(alice, orgA, quote.id);
+  expect(updated.result).toEqual(quote.result);
+  expect(updated.activities).toHaveLength(2);
+  const analytics = await svc.analytics(alice, orgA);
+  expect(
+    analytics.sessions.some(
+      (s) => s.estimatorId === estimator.id && s.completedAt,
+    ),
+  ).toBe(true);
+});
+it("does not expose archived estimators or accept invented public capabilities", async () => {
+  await expect(
+    svc.submitPublicEstimate("invented", answers),
+  ).rejects.toBeInstanceOf(AccessDeniedError);
+  await expect(
+    svc.beginPublicSession("tenant-b", estimatorA, revisionA),
+  ).rejects.toThrow();
+  const { estimator } = await svc.createEstimator(alice, orgA, sample());
+  const revision = await svc.publishDraft(alice, orgA, estimator.id, 0);
+  const session = await svc.beginPublicSession(
+    "tenant-a",
+    estimator.id,
+    revision.id,
+  );
+  await svc.archiveEstimator(alice, orgA, estimator.id);
+  await expect(
+    svc.publicEstimator("tenant-a", estimator.id),
+  ).rejects.toBeInstanceOf(AccessDeniedError);
+  await expect(
+    svc.submitPublicEstimate(session.id, answers),
+  ).rejects.toBeInstanceOf(AccessDeniedError);
+  await expect(
+    svc.updateOrganization(viewer, orgA, { name: "Unauthorized" }),
+  ).rejects.toThrow();
+});

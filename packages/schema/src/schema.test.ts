@@ -76,3 +76,23 @@ describe("portable documents", () => {
     expect(() => parseDocument(deep)).toThrow();
   });
 });
+
+it("validates the complete template gallery and retains extended field definitions", async () => {
+  const { readFileSync } = await import("node:fs");
+  for (const name of [
+    "moving-company",
+    "residential-cleaning",
+    "web-design-agency",
+  ]) {
+    const doc = parseDocument(
+      JSON.parse(
+        readFileSync(
+          new URL(`../../../templates/${name}.oqs.json`, import.meta.url),
+          "utf8",
+        ),
+      ),
+    );
+    expect(doc.estimator.steps.length).toBeGreaterThan(1);
+    expect(doc.estimator.translations["pt-BR"]?.name).toBeTruthy();
+  }
+});

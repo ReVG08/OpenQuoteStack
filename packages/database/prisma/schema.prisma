@@ -71,6 +71,12 @@ enum EstimateStatus {
   completed
   accepted
   declined
+  new
+  contacted
+  qualified
+  won
+  lost
+  archived
 }
 model Organization {
   id              String @id @default(cuid())
@@ -87,6 +93,8 @@ model Organization {
   estimates       Estimate[]
   leads           Lead[]
   auditEntries    AuditEntry[]
+  quoteSessions   QuoteSession[]
+  activities      EstimateActivity[]
 }
 model Membership {
   id             String @id @default(cuid())
@@ -105,6 +113,9 @@ model Estimator {
   name                String
   status              EstimatorStatus @default(draft)
   publishedRevisionId String? @unique
+  draftDefinition     Json?
+  draftVersion        Int @default(0)
+  deletedAt           DateTime?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   organization        Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
@@ -126,6 +137,7 @@ model EstimatorRevision {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   estimator      Estimator @relation("Revisions", fields: [estimatorId, organizationId], references: [id, organizationId], onDelete: Restrict)
   publishedBy    Estimator? @relation("PublishedRevision")
+  quoteSessions  QuoteSession[]
   estimates      Estimate[]
   @@unique([estimatorId, number])
   @@unique([id, organizationId, estimatorId])
@@ -139,11 +151,13 @@ model Estimate {
   answers        Json
   result         Json
   engineVersion  String
-  status         EstimateStatus @default(completed)
+  status         EstimateStatus @default(new)
   createdAt      DateTime @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   revision       EstimatorRevision @relation(fields: [revisionId, organizationId, estimatorId], references: [id, organizationId, estimatorId], onDelete: Restrict)
   lead           Lead?
+  activities     EstimateActivity[]
+  quoteSession   QuoteSession?
   @@unique([id, organizationId])
   @@index([organizationId, createdAt])
 }
@@ -153,6 +167,10 @@ model Lead {
   estimateId     String @unique
   name           String
   email          String
+  phone          String?
+  company        String?
+  address        String?
+  notes          String?
   createdAt      DateTime @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   estimate       Estimate @relation(fields: [estimateId, organizationId], references: [id, organizationId], onDelete: Restrict)
@@ -168,4 +186,33 @@ model AuditEntry {
   createdAt      DateTime @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   @@index([organizationId, createdAt])
+}
+
+model QuoteSession {
+  id             String @id
+  organizationId String
+  estimatorId    String
+  revisionId     String
+  startedAt      DateTime?
+  completedAt    DateTime?
+  lastStep       Int @default(0)
+  estimateId     String? @unique
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  revision       EstimatorRevision @relation(fields: [revisionId, organizationId, estimatorId], references: [id, organizationId, estimatorId], onDelete: Restrict)
+  estimate       Estimate? @relation(fields: [estimateId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  @@index([organizationId, createdAt])
+  @@unique([estimateId, organizationId])
+}
+model EstimateActivity {
+  id             String @id @default(cuid())
+  organizationId String
+  estimateId     String
+  actorId        String
+  kind           String
+  text           String
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  estimate       Estimate @relation(fields: [estimateId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  @@index([organizationId, estimateId, createdAt])
 }

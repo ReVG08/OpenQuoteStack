@@ -430,3 +430,37 @@ describe("conditions", () => {
     ).toBe(false);
   });
 });
+
+it("uses authored hidden values and validates email and time answers", () => {
+  const e = definition([
+    { id: "base", label: "Base", type: "fixed", amountMinor: 100 },
+  ]);
+  e.steps[0]!.fields = [
+    {
+      id: "hidden",
+      label: "Hidden rate",
+      type: "hidden",
+      required: false,
+      defaultValue: 25,
+    },
+    { id: "email", label: "Email", type: "email", required: true },
+    { id: "time", label: "Time", type: "time", required: true },
+  ];
+  e.rules = [
+    {
+      id: "hidden_charge",
+      label: "Hidden charge",
+      type: "formula",
+      expression: { value: "100" },
+    },
+  ];
+  const result = calculateEstimate(e, {
+    hidden: 999,
+    email: "person@example.test",
+    time: "14:30",
+  });
+  expect(result.metadata.answers.hidden).toBe(25);
+  expect(() =>
+    calculateEstimate(e, { email: "invalid", time: "25:00" }),
+  ).toThrow(AnswerValidationError);
+});

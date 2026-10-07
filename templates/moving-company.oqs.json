@@ -9,7 +9,7 @@
   "estimator": {
     "id": "moving-company",
     "name": "Moving Cost Calculator",
-    "description": "A sample estimate using manually supplied distance.",
+    "description": "A clear starting point for your next move. Tell us about the route, your home and any extra care you need.",
     "locale": "en",
     "currency": {
       "code": "USD",
@@ -17,31 +17,22 @@
     },
     "steps": [
       {
-        "id": "move",
-        "title": "Tell us about your move",
+        "id": "route",
+        "title": "Your move",
         "fields": [
           {
             "id": "origin",
             "label": "Origin",
-            "type": "text",
-            "required": true
+            "type": "address",
+            "required": true,
+            "placeholder": "Street, city and postcode"
           },
           {
             "id": "destination",
             "label": "Destination",
-            "type": "text",
-            "required": true
-          },
-          {
-            "id": "bedrooms",
-            "label": "Bedrooms",
-            "type": "number",
+            "type": "address",
             "required": true,
-            "validation": {
-              "min": 0,
-              "max": 20,
-              "integer": true
-            }
+            "placeholder": "Street, city and postcode"
           },
           {
             "id": "distance",
@@ -51,6 +42,24 @@
             "validation": {
               "min": 0,
               "max": 5000
+            },
+            "help": "Enter the route distance in miles. No address lookup is required."
+          }
+        ]
+      },
+      {
+        "id": "home",
+        "title": "Your home",
+        "fields": [
+          {
+            "id": "bedrooms",
+            "label": "Bedrooms",
+            "type": "quantity",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 20,
+              "integer": true
             }
           },
           {
@@ -62,7 +71,7 @@
           {
             "id": "floors",
             "label": "Flights of stairs",
-            "type": "number",
+            "type": "quantity",
             "validation": {
               "min": 0,
               "max": 50,
@@ -73,11 +82,17 @@
               "op": "equals",
               "value": false
             }
-          },
+          }
+        ]
+      },
+      {
+        "id": "services",
+        "title": "A little more detail",
+        "fields": [
           {
             "id": "boxes",
             "label": "Boxes",
-            "type": "number",
+            "type": "quantity",
             "required": true,
             "validation": {
               "min": 0,
@@ -185,7 +200,45 @@
         "belowPercent": "5",
         "abovePercent": "5"
       },
-      "message": "An estimate for planning. Confirm access, inventory and service details with the mover."
+      "message": "An estimate for planning. Confirm access, inventory and service details with the mover.",
+      "terms": "This is a planning estimate, not a binding offer. Final pricing follows confirmation of inventory, access and service availability.",
+      "expiresAfterDays": 14
+    },
+    "leadCapture": {
+      "mode": "after",
+      "fields": ["name", "email", "phone", "notes"],
+      "consentText": "Your details are shared with the moving company so they can follow up on your request."
+    },
+    "translations": {
+      "pt-BR": {
+        "name": "Calculadora de mudan\u00e7a",
+        "description": "Planeje sua mudan\u00e7a com clareza. Conte sobre o trajeto, seu im\u00f3vel e os cuidados extras necess\u00e1rios.",
+        "step:route": "Sua mudan\u00e7a",
+        "step:home": "Seu im\u00f3vel",
+        "step:services": "\u00daltimos detalhes",
+        "field:origin": "Endere\u00e7o de origem",
+        "field:destination": "Endere\u00e7o de destino",
+        "field:distance": "Dist\u00e2ncia (milhas)",
+        "help:distance": "Informe a dist\u00e2ncia do trajeto em milhas. N\u00e3o usamos busca de endere\u00e7os.",
+        "field:bedrooms": "Quartos",
+        "field:elevator": "Elevador dispon\u00edvel",
+        "field:floors": "Lances de escada",
+        "field:boxes": "Caixas",
+        "field:piano": "Transporte de piano",
+        "field:packing": "Servi\u00e7o de embalagem",
+        "field:moving_date": "Data da mudan\u00e7a",
+        "terms": "Estimativa para planejamento, sem car\u00e1ter de oferta vinculante. O valor final depende da confirma\u00e7\u00e3o de invent\u00e1rio, acesso e disponibilidade.",
+        "consent": "Seus dados ser\u00e3o compartilhados com a empresa de mudan\u00e7as para atender sua solicita\u00e7\u00e3o.",
+        "message": "Confirme os detalhes do servi\u00e7o com a empresa.",
+        "rule:base": "Servi\u00e7o b\u00e1sico",
+        "rule:bedrooms": "Quartos",
+        "rule:distance": "Dist\u00e2ncia",
+        "rule:stairs": "Escadas",
+        "rule:boxes": "Caixas",
+        "rule:piano": "Transporte de piano",
+        "rule:packing": "Embalagem",
+        "rule:weekend": "Adicional de fim de semana"
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 # ADR-0005: Retain immutable configuration snapshots
 
-Status: Accepted
+Status: Accepted; editing behavior superseded by [ADR-0012](0012-editable-drafts.md)
 Date: 2026-10-06
 
 ## Context

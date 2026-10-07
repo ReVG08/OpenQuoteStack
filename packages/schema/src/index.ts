@@ -94,7 +94,27 @@ export const formulaSchema: z.ZodType<Formula> = z.lazy(() =>
     }),
   ]),
 );
-const choice = z.strictObject({ id, label });
+const safeImage = z
+  .string()
+  .max(2048)
+  .refine((v) => /^https?:\/\//.test(v), "HTTP image URL required");
+const choice = z.strictObject({ id, label, imageUrl: safeImage.optional() });
+export const numericFieldTypes = [
+  "number",
+  "currency",
+  "quantity",
+  "slider",
+] as const;
+export const choiceFieldTypes = [
+  "select",
+  "radio",
+  "image_choice",
+  "multiselect",
+] as const;
+export const isNumericField = (type: string) =>
+  (numericFieldTypes as readonly string[]).includes(type);
+export const isChoiceField = (type: string) =>
+  (choiceFieldTypes as readonly string[]).includes(type);
 export const fieldSchema = z
   .strictObject({
     id,
@@ -106,9 +126,25 @@ export const fieldSchema = z
       "select",
       "multiselect",
       "date",
+      "textarea",
+      "currency",
+      "email",
+      "phone",
+      "address",
+      "time",
+      "radio",
+      "checkbox",
+      "quantity",
+      "slider",
+      "image_choice",
+      "info",
+      "divider",
+      "hidden",
     ]),
     required: z.boolean().default(false),
     help: z.string().max(500).optional(),
+    placeholder: z.string().max(200).optional(),
+    defaultValue: answerSchema.optional(),
     choices: z.array(choice).max(100).optional(),
     validation: z
       .strictObject({
@@ -121,7 +157,7 @@ export const fieldSchema = z
     visibleWhen: conditionSchema.optional(),
   })
   .superRefine((f, ctx) => {
-    if (["select", "multiselect"].includes(f.type) && !f.choices?.length)
+    if (isChoiceField(f.type) && !f.choices?.length)
       ctx.addIssue({ code: "custom", message: "Choice fields need choices" });
     if (
       f.choices &&
@@ -199,6 +235,26 @@ export const estimatorSchema = z
       )
       .min(1)
       .max(20),
+    translations: z
+      .partialRecord(
+        z.enum(["en", "pt-BR"]),
+        z.record(z.string().max(150), z.string().max(2000)),
+      )
+      .default({}),
+    leadCapture: z
+      .strictObject({
+        mode: z
+          .enum(["before", "after", "optional", "disabled"])
+          .default("after"),
+        fields: z
+          .array(
+            z.enum(["name", "email", "phone", "company", "address", "notes"]),
+          )
+          .max(6)
+          .default(["name", "email"]),
+        consentText: z.string().max(1000).optional(),
+      })
+      .default({ mode: "after", fields: ["name", "email"] }),
     constants: z.record(id, decimal).default({}),
     rules: z.array(ruleSchema).min(1).max(200),
     output: z
@@ -209,6 +265,8 @@ export const estimatorSchema = z
           .strictObject({ belowPercent: decimal, abovePercent: decimal })
           .optional(),
         message: z.string().max(1000).optional(),
+        terms: z.string().max(4000).optional(),
+        expiresAfterDays: z.number().int().min(1).max(365).optional(),
         messages: z
           .array(
             z.strictObject({
@@ -255,8 +313,40 @@ export const estimatorSchema = z
       if (field.visibleWhen) checkCondition(field.visibleWhen, preceding);
       preceding.add(field.id);
     }
+    for (const field of fields) {
+      if (field.type === "hidden" && field.defaultValue === undefined)
+        fail("Hidden fields require a default value");
+      if (
+        field.type === "slider" &&
+        (field.validation?.max === undefined ||
+          field.validation?.min === undefined)
+      )
+        fail("Sliders require minimum and maximum");
+      if (
+        field.type === "image_choice" &&
+        field.choices?.some((c) => !c.imageUrl)
+      )
+        fail("Image choices require image URLs");
+      const v = field.defaultValue;
+      if (
+        v !== undefined &&
+        ((isNumericField(field.type) &&
+          (typeof v !== "number" ||
+            v < 0 ||
+            (field.validation?.min !== undefined && v < field.validation.min) ||
+            (field.validation?.max !== undefined &&
+              v > field.validation.max))) ||
+          (["boolean", "checkbox"].includes(field.type) &&
+            typeof v !== "boolean") ||
+          (isChoiceField(field.type) &&
+            !(Array.isArray(v)
+              ? v.every((x) => field.choices?.some((c) => c.id === x))
+              : field.choices?.some((c) => c.id === v))))
+      )
+        fail(`Invalid default value: ${field.id}`);
+    }
     const variables = new Set([
-      ...fields.filter((f) => f.type === "number").map((f) => f.id),
+      ...fields.filter((f) => isNumericField(f.type)).map((f) => f.id),
       ...Object.keys(e.constants),
     ]);
     for (const key of Object.keys(e.constants))
@@ -274,8 +364,9 @@ export const estimatorSchema = z
       if (rule.when) checkCondition(rule.when);
       if (
         "field" in rule &&
-        fieldMap.get(rule.field)?.type !==
-          (rule.type === "date_weekday" ? "date" : "number")
+        (rule.type === "date_weekday"
+          ? fieldMap.get(rule.field)?.type !== "date"
+          : !isNumericField(fieldMap.get(rule.field)?.type ?? ""))
       )
         fail(`Invalid pricing field: ${rule.field}`);
       if (rule.type === "formula") checkFormula(rule.expression);

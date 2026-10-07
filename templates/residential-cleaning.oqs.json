@@ -1,0 +1,232 @@
+{
+  "schemaVersion": "1",
+  "template": {
+    "id": "residential-cleaning",
+    "name": "Residential cleaning",
+    "category": "Home services",
+    "version": "1.0.0",
+    "description": "A considered clean for your home. Choose the size, frequency and finishing touches."
+  },
+  "estimator": {
+    "id": "residential-cleaning",
+    "name": "Residential cleaning",
+    "description": "A considered clean for your home. Choose the size, frequency and finishing touches.",
+    "locale": "en",
+    "currency": {
+      "code": "USD",
+      "minorUnits": 2
+    },
+    "steps": [
+      {
+        "id": "home",
+        "title": "Your home",
+        "fields": [
+          {
+            "id": "bedrooms",
+            "label": "Bedrooms",
+            "type": "quantity",
+            "required": true,
+            "validation": {
+              "min": 0,
+              "max": 20,
+              "integer": true
+            }
+          },
+          {
+            "id": "bathrooms",
+            "label": "Bathrooms",
+            "type": "quantity",
+            "required": true,
+            "validation": {
+              "min": 1,
+              "max": 20,
+              "integer": true
+            }
+          },
+          {
+            "id": "area",
+            "label": "Floor area (square feet)",
+            "type": "number",
+            "required": true,
+            "validation": {
+              "min": 100,
+              "max": 20000
+            }
+          }
+        ]
+      },
+      {
+        "id": "clean",
+        "title": "Your clean",
+        "fields": [
+          {
+            "id": "frequency",
+            "label": "How often?",
+            "type": "radio",
+            "required": true,
+            "choices": [
+              {
+                "id": "once",
+                "label": "One-time clean"
+              },
+              {
+                "id": "weekly",
+                "label": "Weekly"
+              },
+              {
+                "id": "biweekly",
+                "label": "Every two weeks"
+              }
+            ]
+          },
+          {
+            "id": "deep",
+            "label": "Deep clean",
+            "type": "boolean",
+            "required": true
+          },
+          {
+            "id": "oven",
+            "label": "Inside the oven",
+            "type": "checkbox",
+            "required": true
+          },
+          {
+            "id": "windows",
+            "label": "Interior windows",
+            "type": "checkbox",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "base",
+        "label": "Visit and supplies",
+        "type": "fixed",
+        "amountMinor": 6000
+      },
+      {
+        "id": "bedrooms",
+        "label": "Bedrooms",
+        "type": "per_unit",
+        "field": "bedrooms",
+        "rateMinor": 1800
+      },
+      {
+        "id": "bathrooms",
+        "label": "Bathrooms",
+        "type": "per_unit",
+        "field": "bathrooms",
+        "rateMinor": 2500
+      },
+      {
+        "id": "area",
+        "label": "Floor area",
+        "type": "per_unit",
+        "field": "area",
+        "rateMinor": 3
+      },
+      {
+        "id": "oven",
+        "label": "Oven cleaning",
+        "type": "fixed",
+        "amountMinor": 3500,
+        "when": {
+          "field": "oven",
+          "op": "equals",
+          "value": true
+        }
+      },
+      {
+        "id": "windows",
+        "label": "Interior windows",
+        "type": "fixed",
+        "amountMinor": 4000,
+        "when": {
+          "field": "windows",
+          "op": "equals",
+          "value": true
+        }
+      },
+      {
+        "id": "deep",
+        "label": "Deep-clean service",
+        "type": "percentage",
+        "percent": "50",
+        "basis": "running_total",
+        "when": {
+          "field": "deep",
+          "op": "equals",
+          "value": true
+        }
+      },
+      {
+        "id": "weekly",
+        "label": "Weekly plan discount",
+        "type": "percentage",
+        "percent": "-15",
+        "basis": "running_total",
+        "when": {
+          "field": "frequency",
+          "op": "equals",
+          "value": "weekly"
+        }
+      },
+      {
+        "id": "biweekly",
+        "label": "Fortnightly plan discount",
+        "type": "percentage",
+        "percent": "-10",
+        "basis": "running_total",
+        "when": {
+          "field": "frequency",
+          "op": "equals",
+          "value": "biweekly"
+        }
+      }
+    ],
+    "translations": {
+      "pt-BR": {
+        "name": "Limpeza residencial",
+        "description": "Uma limpeza pensada para sua casa. Escolha o tamanho, a frequ\u00eancia e os cuidados extras.",
+        "step:home": "Sua casa",
+        "step:clean": "Sua limpeza",
+        "field:bedrooms": "Quartos",
+        "field:bathrooms": "Banheiros",
+        "field:area": "\u00c1rea (p\u00e9s quadrados)",
+        "field:frequency": "Qual frequ\u00eancia?",
+        "choice:frequency.once": "Limpeza avulsa",
+        "choice:frequency.weekly": "Semanal",
+        "choice:frequency.biweekly": "A cada duas semanas",
+        "field:deep": "Limpeza profunda",
+        "field:oven": "Interior do forno",
+        "field:windows": "Janelas internas",
+        "rule:base": "Visita e materiais",
+        "rule:bedrooms": "Quartos",
+        "rule:bathrooms": "Banheiros",
+        "rule:area": "\u00c1rea",
+        "rule:oven": "Limpeza do forno",
+        "rule:windows": "Janelas internas",
+        "rule:deep": "Limpeza profunda",
+        "rule:weekly": "Desconto semanal",
+        "rule:biweekly": "Desconto quinzenal",
+        "message": "Confirme condi\u00e7\u00f5es de acesso e detalhes do servi\u00e7o.",
+        "terms": "O valor final depende da condi\u00e7\u00e3o do im\u00f3vel e da confirma\u00e7\u00e3o dos servi\u00e7os.",
+        "consent": "Usaremos seus dados apenas para atender este or\u00e7amento."
+      }
+    },
+    "leadCapture": {
+      "mode": "after",
+      "fields": ["name", "email", "phone"],
+      "consentText": "We will use your details only to follow up on this estimate."
+    },
+    "output": {
+      "minimumMinor": 10000,
+      "message": "Please confirm access and the scope of cleaning with the provider.",
+      "terms": "Final pricing depends on property condition and confirmation of service scope.",
+      "expiresAfterDays": 14
+    }
+  }
+}

@@ -1,5 +1,7 @@
 import {
   assertDataBudget,
+  isNumericField,
+  isChoiceField,
   estimatorSchema,
   answerSchema,
   type Answer,
@@ -22,7 +24,7 @@ import {
 } from "./money.js";
 export { evaluateCondition } from "./conditions.js";
 export { parseFormula } from "./formula.js";
-export const ENGINE_VERSION = "0.1.0";
+export const ENGINE_VERSION = "0.2.0";
 export class AnswerValidationError extends Error {
   constructor(public readonly issues: { field: string; message: string }[]) {
     super("Invalid estimator answers");
@@ -75,8 +77,15 @@ export function validateAnswers(
   for (const field of fields) {
     if (field.visibleWhen && !evaluateCondition(field.visibleWhen, answers))
       continue;
+    if (["info", "divider"].includes(field.type)) continue;
     visibleFields.push(field.id);
-    const v = Object.hasOwn(raw, field.id) ? raw[field.id] : undefined;
+    // Hidden values are authored constants; clients cannot override them.
+    const v =
+      field.type === "hidden"
+        ? field.defaultValue
+        : Object.hasOwn(raw, field.id)
+          ? raw[field.id]
+          : field.defaultValue;
     const empty =
       v === undefined || v === "" || (Array.isArray(v) && v.length === 0);
     const fail = (message: string) => issues.push({ field: field.id, message });
@@ -89,20 +98,26 @@ export function validateAnswers(
       continue;
     }
     const valid =
-      field.type === "number"
-        ? typeof v === "number" && v >= 0
-        : field.type === "boolean"
-          ? typeof v === "boolean"
-          : field.type === "multiselect"
-            ? Array.isArray(v) &&
-              new Set(v).size === v.length &&
-              v.every((s) => field.choices?.some((c) => c.id === s))
-            : typeof v === "string" &&
-              (field.type === "select"
-                ? field.choices?.some((c) => c.id === v)
-                : field.type === "date"
-                  ? validDate(v)
-                  : true);
+      field.type === "hidden"
+        ? true
+        : isNumericField(field.type)
+          ? typeof v === "number" && v >= 0
+          : ["boolean", "checkbox"].includes(field.type)
+            ? typeof v === "boolean"
+            : field.type === "multiselect"
+              ? Array.isArray(v) &&
+                new Set(v).size === v.length &&
+                v.every((s) => field.choices?.some((c) => c.id === s))
+              : typeof v === "string" &&
+                (isChoiceField(field.type)
+                  ? field.choices?.some((c) => c.id === v)
+                  : field.type === "date"
+                    ? validDate(v)
+                    : field.type === "email"
+                      ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+                      : field.type === "time"
+                        ? /^([01]\d|2[0-3]):[0-5]\d$/.test(v)
+                        : true);
     if (!valid) {
       fail("Answer does not match field type");
       continue;

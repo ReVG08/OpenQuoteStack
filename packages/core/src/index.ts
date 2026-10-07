@@ -7,6 +7,7 @@ export type Permission =
   | "estimator.publish"
   | "estimate.read"
   | "estimate.create"
+  | "estimate.manage"
   | "organization.manage";
 const permissions: Record<Role, readonly Permission[]> = {
   owner: [
@@ -15,6 +16,7 @@ const permissions: Record<Role, readonly Permission[]> = {
     "estimator.publish",
     "estimate.read",
     "estimate.create",
+    "estimate.manage",
     "organization.manage",
   ],
   admin: [
@@ -23,9 +25,15 @@ const permissions: Record<Role, readonly Permission[]> = {
     "estimator.publish",
     "estimate.read",
     "estimate.create",
+    "estimate.manage",
     "organization.manage",
   ],
-  sales: ["estimator.read", "estimate.read", "estimate.create"],
+  sales: [
+    "estimator.read",
+    "estimate.read",
+    "estimate.create",
+    "estimate.manage",
+  ],
   viewer: ["estimator.read", "estimate.read"],
 };
 export function hasPermission(role: string, permission: Permission): boolean {
@@ -34,6 +42,28 @@ export function hasPermission(role: string, permission: Permission): boolean {
     permissions[role as Role].includes(permission)
   );
 }
+const color = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+const asset = z
+  .string()
+  .regex(/^\/assets\/[a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+\.(png|jpg|webp)$/);
+export const brandingSchema = z.strictObject({
+  displayName: z.string().max(100).optional(),
+  primaryColor: color.optional(),
+  secondaryColor: color.optional(),
+  backgroundColor: color.optional(),
+  font: z.enum(["sans", "serif", "mono"]).optional(),
+  buttonStyle: z.enum(["solid", "outline"]).optional(),
+  radius: z.number().int().min(0).max(20).optional(),
+  logo: asset.optional(),
+  favicon: asset.optional(),
+  businessAddress: z.string().max(500).optional(),
+  email: z.union([z.email(), z.literal("")]).optional(),
+  phone: z.string().max(80).optional(),
+  website: z
+    .union([z.url().refine((v) => /^https?:\/\//.test(v)), z.literal("")])
+    .optional(),
+});
+export type Branding = z.infer<typeof brandingSchema>;
 export const organizationInputSchema = z.strictObject({
   name: z.string().trim().min(2).max(100),
   slug: z
@@ -54,15 +84,7 @@ export const organizationInputSchema = z.strictObject({
       }
     }, "Unknown timezone"),
   defaultCurrency: z.string().regex(/^[A-Z]{3}$/),
-  branding: z
-    .strictObject({
-      displayName: z.string().max(100).optional(),
-      primaryColor: z
-        .string()
-        .regex(/^#[0-9a-fA-F]{6}$/)
-        .optional(),
-    })
-    .default({}),
+  branding: brandingSchema.default({}),
 });
 export type EventName =
   | "estimator.created"
@@ -103,3 +125,12 @@ export class EventBus {
     );
   }
 }
+
+export const contactSchema = z.strictObject({
+  name: z.string().trim().min(1).max(100),
+  email: z.email().max(250),
+  phone: z.string().max(80).optional(),
+  company: z.string().max(200).optional(),
+  address: z.string().max(500).optional(),
+  notes: z.string().max(2000).optional(),
+});

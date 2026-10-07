@@ -1,0 +1,218 @@
+{
+  "schemaVersion": "1",
+  "template": {
+    "id": "web-design-agency",
+    "name": "Website design",
+    "category": "Creative services",
+    "version": "1.0.0",
+    "description": "Define a website that fits your business. Start with a package and shape the scope."
+  },
+  "estimator": {
+    "id": "web-design-agency",
+    "name": "Website design",
+    "description": "Define a website that fits your business. Start with a package and shape the scope.",
+    "locale": "en",
+    "currency": {
+      "code": "USD",
+      "minorUnits": 2
+    },
+    "steps": [
+      {
+        "id": "scope",
+        "title": "The right starting point",
+        "fields": [
+          {
+            "id": "package",
+            "label": "Choose your package",
+            "type": "radio",
+            "required": true,
+            "choices": [
+              {
+                "id": "launch",
+                "label": "Launch \u2014 a focused business site"
+              },
+              {
+                "id": "growth",
+                "label": "Growth \u2014 a richer brand experience"
+              },
+              {
+                "id": "custom",
+                "label": "Custom \u2014 a tailored platform"
+              }
+            ]
+          },
+          {
+            "id": "pages",
+            "label": "Number of pages",
+            "type": "quantity",
+            "required": true,
+            "validation": {
+              "min": 1,
+              "max": 100,
+              "integer": true
+            }
+          }
+        ]
+      },
+      {
+        "id": "features",
+        "title": "Make it yours",
+        "fields": [
+          {
+            "id": "commerce",
+            "label": "Online store",
+            "type": "boolean",
+            "required": true
+          },
+          {
+            "id": "booking",
+            "label": "Booking integration",
+            "type": "boolean",
+            "required": true
+          },
+          {
+            "id": "copy",
+            "label": "Copywriting",
+            "type": "boolean",
+            "required": true
+          },
+          {
+            "id": "rush",
+            "label": "Priority delivery",
+            "type": "boolean",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "rules": [
+      {
+        "id": "launch",
+        "label": "Launch package",
+        "type": "fixed",
+        "amountMinor": 120000,
+        "when": {
+          "field": "package",
+          "op": "equals",
+          "value": "launch"
+        }
+      },
+      {
+        "id": "growth",
+        "label": "Growth package",
+        "type": "fixed",
+        "amountMinor": 260000,
+        "when": {
+          "field": "package",
+          "op": "equals",
+          "value": "growth"
+        }
+      },
+      {
+        "id": "custom",
+        "label": "Custom package",
+        "type": "fixed",
+        "amountMinor": 450000,
+        "when": {
+          "field": "package",
+          "op": "equals",
+          "value": "custom"
+        }
+      },
+      {
+        "id": "pages",
+        "label": "Page design",
+        "type": "per_unit",
+        "field": "pages",
+        "rateMinor": 18000
+      },
+      {
+        "id": "commerce",
+        "label": "Online store",
+        "type": "fixed",
+        "amountMinor": 150000,
+        "when": {
+          "field": "commerce",
+          "op": "equals",
+          "value": true
+        }
+      },
+      {
+        "id": "booking",
+        "label": "Booking integration",
+        "type": "fixed",
+        "amountMinor": 60000,
+        "when": {
+          "field": "booking",
+          "op": "equals",
+          "value": true
+        }
+      },
+      {
+        "id": "copy",
+        "label": "Copywriting",
+        "type": "fixed",
+        "amountMinor": 70000,
+        "when": {
+          "field": "copy",
+          "op": "equals",
+          "value": true
+        }
+      },
+      {
+        "id": "rush",
+        "label": "Priority delivery",
+        "type": "percentage",
+        "percent": "25",
+        "basis": "running_total",
+        "when": {
+          "field": "rush",
+          "op": "equals",
+          "value": true
+        }
+      }
+    ],
+    "translations": {
+      "pt-BR": {
+        "name": "Cria\u00e7\u00e3o de sites",
+        "description": "Um site que combina com seu neg\u00f3cio. Escolha um pacote e defina o escopo.",
+        "step:scope": "Seu ponto de partida",
+        "step:features": "Do seu jeito",
+        "field:package": "Escolha seu pacote",
+        "choice:package.launch": "Essencial \u2014 presen\u00e7a para seu neg\u00f3cio",
+        "choice:package.growth": "Crescimento \u2014 experi\u00eancia de marca",
+        "choice:package.custom": "Personalizado \u2014 plataforma sob medida",
+        "field:pages": "N\u00famero de p\u00e1ginas",
+        "field:commerce": "Loja virtual",
+        "field:booking": "Integra\u00e7\u00e3o de agendamento",
+        "field:copy": "Reda\u00e7\u00e3o de conte\u00fado",
+        "field:rush": "Entrega priorit\u00e1ria",
+        "rule:launch": "Pacote essencial",
+        "rule:growth": "Pacote crescimento",
+        "rule:custom": "Pacote personalizado",
+        "rule:pages": "Design das p\u00e1ginas",
+        "rule:commerce": "Loja virtual",
+        "rule:booking": "Integra\u00e7\u00e3o de agendamento",
+        "rule:copy": "Reda\u00e7\u00e3o",
+        "rule:rush": "Entrega priorit\u00e1ria",
+        "message": "A faixa de valores reflete a descoberta e a complexidade do projeto.",
+        "terms": "Estimativa de escopo. Cronograma e entregas ser\u00e3o definidos em uma proposta separada.",
+        "consent": "Usaremos seus dados apenas para atender este or\u00e7amento."
+      }
+    },
+    "leadCapture": {
+      "mode": "after",
+      "fields": ["name", "email", "phone"],
+      "consentText": "We will use your details only to follow up on this estimate."
+    },
+    "output": {
+      "range": {
+        "belowPercent": "10",
+        "abovePercent": "20"
+      },
+      "message": "The range accounts for discovery and project complexity.",
+      "terms": "A scope estimate. Timeline and deliverables are agreed in a separate proposal.",
+      "expiresAfterDays": 30
+    }
+  }
+}
