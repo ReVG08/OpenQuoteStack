@@ -11,22 +11,23 @@ TypeScript packages. Basic operation requires no proprietary cloud service.
 
 ## Current capabilities
 
-- Versioned `.oqs.json` documents with runtime validation.
-- Fixed, per-unit, conditional, graduated-tier and formula pricing.
-- Ordered percentages, minimums, maximums and estimate ranges.
-- Exact monetary arithmetic with itemized calculation traces.
-- Shared AND/OR conditions for visibility, pricing and output.
-- Email/password registration, login, logout and database sessions.
-- Organizations, explicit membership permissions and tenant-scoped services.
-- Immutable estimator revisions, publishing, rollback and saved estimates.
-- Organization branding fields, English and Brazilian Portuguese UI foundations,
-  and light/dark themes.
-- A moving calculator with manually supplied distance.
+- Visual step/field builder with keyboard and pointer sorting, validation and AND/OR visibility.
+- Visual fixed, per-unit, conditional, graduated-tier, percentage and weekday pricing;
+  advanced safe formulas, bounds and ranges.
+- Exact monetary arithmetic with ordered, itemized explanations.
+- Editable drafts, immutable revisions, explicit publishing and rollback.
+- Branded, mobile-friendly public calculators with progress and configurable contact capture.
+- Estimates, statuses, internal notes, lightweight leads and first-party conversion reports.
+- Logo/favicon uploads, live branding preview and branded estimate PDFs.
+- Moving, residential cleaning and agency templates; validated `.oqs.json` import/export.
+- English and Brazilian Portuguese core UI; light, dark and system admin themes.
+- Email/password accounts, database sessions, organization memberships and tenant isolation.
+- PostgreSQL migrations and Docker persistence for data and brand images.
 
-The application includes a JSON revision editor and an authenticated calculation
-workspace. A visual builder, customer-facing publishing/embedding, REST API,
-network SDK, webhook delivery and analytics are planned, not available features.
-The public demo is a browser-only engine playground and does not save customer data.
+The REST API, network SDK, embedding, webhook delivery, custom domains and team
+administration are planned. The public demo is a browser-only playground;
+published organization calculators save estimates on the server. Mapping and
+customer file uploads are not included.
 
 ## Architecture
 
@@ -61,8 +62,11 @@ authentication, HTTP, browser, clock or locale dependency. Monetary values are
 integer minor units; quantities, formulas and percentages use exact rational
 intermediates. Currency formatting belongs to the caller.
 
-The [moving template](templates/moving-company.oqs.json) is a complete portable
-example. See package documentation for [Schema](packages/schema/README.md),
+The [moving](templates/moving-company.oqs.json),
+[cleaning](templates/residential-cleaning.oqs.json) and
+[agency](templates/web-design-agency.oqs.json) templates are portable examples.
+Review example prices, terms and measurement units before publishing. Selecting an
+organization currency adapts minor units without performing exchange conversion. See package documentation for [Schema](packages/schema/README.md),
 [Engine](packages/engine/README.md) and the [local SDK](packages/sdk/README.md).
 
 ## Local development
@@ -90,13 +94,17 @@ pnpm dev
 ```
 
 Open `http://localhost:3000`. Register an account, create an organization, add the
-moving template, and publish a revision to save estimates. If another application
+a template, customize fields and pricing, then publish. The builder provides a
+public customer link; completed calculations appear under Estimates. Branding can
+be configured before publishing or later. If another application
 uses port 3000, use `pnpm --filter @openquotestack/web dev --port 3001` after
-`pnpm typecheck`, and set `BETTER_AUTH_URL=http://localhost:3001` before startup.
+`pnpm db:generate` and building the engine/core packages, and set `BETTER_AUTH_URL=http://localhost:3001` before startup.
 Restart after changing authentication environment variables.
 
 Optional seeding uses an existing registered account. Set `SEED_OWNER_EMAIL` in
-`.env`, then run `pnpm db:seed`. No default account or password is installed.
+`.env`, then run `SEED_DEMO=1 pnpm db:seed`. This adds a separate fictional
+Acme Moving workspace, three calculators and sample activity; it preserves existing
+seeded workspaces. No default account or password is installed.
 
 ```sh
 pnpm example       # Builds the portable packages and prints an itemized moving quote
@@ -121,10 +129,15 @@ cp .env.example .env
 docker compose up -d --build
 ```
 
-Compose starts PostgreSQL with persistent storage, applies migrations in a one-shot
+Compose persists PostgreSQL and normalized brand images, applies migrations in a one-shot
 service, then starts the application. Ports bind to loopback by default. The web
 container runs as a non-root user. Read the [deployment guide](docs/deployment/docker.md)
 before exposing an installation publicly, configuring TLS or upgrading a database.
+
+## Product guide
+
+See [authoring and customer workflow](docs/concepts/product-workflow.md) for drafts,
+publication, contact settings, import/export, analytics and PDF behavior.
 
 ## Contributing and roadmap
 

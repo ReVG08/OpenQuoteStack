@@ -14,3 +14,6 @@ decision is superseded; keep historical reasoning available.
 - [ADR-0009: Version portable documents explicitly](0009-schema-versioning.md)
 - [ADR-0010: Publish in-process events after commit](0010-internal-event-model.md)
 - [ADR-0011: Use AGPL-3.0-only](0011-open-source-license.md)
+- [ADR-0012: Separate editable drafts from immutable revisions](0012-editable-drafts.md)
+- [ADR-0013: Pin customer sessions to a published revision](0013-public-quote-sessions.md)
+- [ADR-0014: Store normalized brand images locally](0014-local-brand-assets.md)

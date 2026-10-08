@@ -16,13 +16,13 @@ operator access to PostgreSQL remains privileged and is outside tenant authoriza
 The engine has no executable definitions. Formulas accept an arithmetic AST,
 numeric answer variables and declared constants. Validation rejects unknown constructs,
 invalid references, reserved identifiers, cycles and excessive definition depth/size.
-Hidden answers cannot influence charges. Saved quotes are recalculated server-side;
+Hidden fields use authored defaults; customers cannot override them. Saved quotes are recalculated server-side;
 a preview result submitted by a browser is never trusted.
 
 Secrets stay in ignored environment files or the deployment environment. Do not
 log credentials, session tokens, customer answers or full authentication requests.
 The application returns generic operation errors and a minimal health response.
-Auth library logging is disabled; operators should add sanitized operational metrics
+Auth library and framework server-action argument logging are disabled; operators should add sanitized operational metrics
 rather than request dumps. Audit entries contain actor/action/resource identifiers,
 not answer contents.
 
@@ -54,3 +54,18 @@ and [MySQL decompression limits](https://github.com/advisories/GHSA-rgwj-5xj2-c3
 OpenQuoteStack uses PostgreSQL; MySQL2 is a transitive CLI dependency. Remove these
 overrides when upstream constraints resolve patched versions without them, and rerun
 Prisma configuration, migrations, authentication tests and application builds.
+
+## Public calculations and brand assets
+
+Public sessions use random, revision-pinned capabilities with a 24-hour lifetime.
+The server validates answers and calculates totals; repeat submissions are idempotent.
+Session capabilities grant no tenant reads. Views and progress do not store IP
+addresses or user agents. Public mutations have bounded in-process rate limits;
+a reverse proxy or shared limiter is needed for sustained abuse protection.
+
+Administrator image uploads require a matching origin and tenant permissions.
+PNG/JPEG/WebP uploads are limited to 2 MB and 20 million pixels, normalized to WebP
+and stripped of metadata. SVG and customer uploads are unsupported. Brand images
+are public. Paths are tenant-scoped and validated before filesystem access; PDF
+logos are read locally without remote fetching. Build tracing excludes private
+environment files, local data and Git internals.

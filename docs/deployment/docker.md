@@ -17,8 +17,8 @@ docker compose logs migrate web
 ```
 
 PostgreSQL 18 stores persistent data under `/var/lib/postgresql`; Compose mounts a
-named volume at that path. `docker compose down` retains data. Removing the volume
-is destructive. Back up with PostgreSQL tools and test restoration separately.
+named volume at that path. `docker compose down` retains data. Removing volumes is destructive. The `brand_assets` volume stores normalized
+logos and icons under `/app/data/assets`; back it up with the database. Back up with PostgreSQL tools and test restoration separately.
 Do not change a PostgreSQL major-version image over an existing data directory
 without following its upgrade procedure.
 
@@ -44,3 +44,8 @@ For upgrades, back up first, review migrations and changelog, then rebuild. If t
 migration service has already exited, use `docker compose up -d --build --force-recreate`
 to recreate services. Rollback of application binaries is distinct from estimator
 revision rollback and may require compatible database changes.
+
+Local non-container development uses `OQS_ASSET_DIR` (default `.local/assets`
+relative to the web process). Use an absolute path when CLI and application working
+directories differ. Container replicas need a shared asset mount. Uploaded assets
+are public; keep private files out of this directory.

@@ -18,3 +18,10 @@ Unversioned files cannot distinguish incompatible formats. Automatic best-effort
 ## Consequences
 
 Template version and schema version have different purposes. Future migrations must be explicit, validated transformations. Semantic engine changes also need release/version discipline; schema version alone is insufficient.
+
+Version 1 can gain optional authoring features without changing existing definitions.
+New field types and properties require a reader release that supports them; older
+strict readers reject those files. Schema version does not imply forward compatibility
+between every package release. Import validates the entire document rather than
+dropping unknown properties. A format change that reinterprets existing data needs
+a new schema version and an explicit migration.

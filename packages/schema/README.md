@@ -26,3 +26,15 @@ confirm it against the intended currency rather than assuming two decimal places
 See the [moving template](../../templates/moving-company.oqs.json) and
 [pricing semantics](../../docs/concepts/pricing.md). No web application imports
 are needed. License: AGPL-3.0-only.
+
+Supported field types include text/textarea, number/currency/quantity/slider,
+email/phone/address, date/time, select/radio/image choice, checkbox/yes-no,
+multiselect, information/divider and authored hidden values. Defaults are validated;
+hidden values cannot be overridden by customer answers. Image-choice URLs use
+HTTP(S); logo storage is an application concern.
+
+Definitions also include locale translations, contact capture mode/fields, terms
+and optional expiration days. Enabled capture requires name and email. These are
+version-1 authoring additions; older strict readers can reject unsupported fields.
+Use compatible package releases rather than assuming forward compatibility from
+the schema version alone.

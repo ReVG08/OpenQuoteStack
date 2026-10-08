@@ -28,7 +28,8 @@ fixture interference.
 
 Integration coverage includes tenant-ID/resource-ID manipulation, read/write
 permissions, composite ownership constraints, snapshot immutability, publishing,
-rollback, archiving, after-commit events, registration, login/logout, password hashing,
+rollback, optimistic draft conflicts, revision-pinned public sessions, idempotent
+submissions, contact capture, archiving, after-commit events, registration, login/logout, password hashing,
 CSRF origin rejection and HTTPS cookie attributes.
 
 GitHub Actions runs formatting, lint, types, behavior tests, integration tests and
@@ -42,3 +43,14 @@ browser state and local databases belong under ignored `.local/`, not source con
 
 ESLint 9 is pinned for compatibility with the current Next.js React/accessibility
 plugins. Move to ESLint 10 when those plugins support its removed context APIs.
+
+For product changes, verify account creation → organization → branding → template →
+field/condition/pricing edits → preview → publication → public completion → contact
+capture → estimate/lead/analytics → PDF. Publish changed prices and confirm the
+previous estimate still displays its original revision and result. Test imports
+with a collision and an invalid file, keyboard sorting, core Portuguese copy, and
+customer flow at a mobile viewport. Audit relevant screens with WCAG A/AA rules;
+manual keyboard/focus and visual checks remain necessary.
+
+Test discovery is restricted to source package/application directories so generated
+standalone server copies cannot be collected as duplicate suites.
