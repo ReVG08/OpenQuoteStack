@@ -26,3 +26,4 @@
 - Template currency selection preserves example major-unit prices across exponents.
 - Pricing displays retain declared calculation order, including adjustments and bounds.
 - Brand images persist separately from the Docker application image.
+- Renaming choice keys preserves defaults and pricing conditions.

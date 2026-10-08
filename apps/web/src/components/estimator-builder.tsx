@@ -1,4 +1,5 @@
 "use client";
+import { renameChoice } from "@/lib/choice-references";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -219,14 +220,23 @@ export function EstimatorBuilder({
     setDirty(true);
     setMessage("");
   };
-  const changeField = (next: Field) =>
+  const changeField = (next: Field) => {
+    let base = e;
+    for (const choice of next.choices ?? []) {
+      if (
+        field?.choices?.find((previous) => previous.id === choice.id)?.label !==
+        choice.label
+      )
+        base = clearTranslation(base, `choice:${next.id}.${choice.id}`, locale);
+    }
     change({
-      ...e,
-      steps: e.steps.map((s) => ({
+      ...base,
+      steps: base.steps.map((s) => ({
         ...s,
         fields: s.fields.map((f) => (f.id === selected ? next : f)),
       })),
     });
+  };
   function renameKey(id: string) {
     if (!field || !id || id === field.id) return;
     if (all.some((f) => f.id === id)) return;
@@ -976,14 +986,14 @@ export function EstimatorBuilder({
                               <input
                                 value={c.id}
                                 onChange={(event) =>
-                                  changeField({
-                                    ...field,
-                                    choices: field.choices!.map((x, j) =>
-                                      j === i
-                                        ? { ...x, id: event.target.value }
-                                        : x,
+                                  change(
+                                    renameChoice(
+                                      e,
+                                      field.id,
+                                      c.id,
+                                      event.target.value,
                                     ),
-                                  })
+                                  )
                                 }
                               />
                             </label>
