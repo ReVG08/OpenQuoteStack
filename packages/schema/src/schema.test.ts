@@ -96,3 +96,31 @@ it("validates the complete template gallery and retains extended field definitio
     expect(doc.estimator.translations["pt-BR"]?.name).toBeTruthy();
   }
 });
+
+it("rejects invalid authored defaults and unusable contact configurations", () => {
+  for (const field of [
+    {
+      id: "bad",
+      label: "Bad",
+      type: "radio",
+      choices: [{ id: "a", label: "A" }],
+      defaultValue: ["a"],
+    },
+    {
+      id: "bad",
+      label: "Bad",
+      type: "quantity",
+      validation: { integer: true },
+      defaultValue: 1.5,
+    },
+    { id: "bad", label: "Bad", type: "email", defaultValue: "invalid" },
+    { id: "bad", label: "Bad", type: "date", defaultValue: "2026-02-30" },
+  ]) {
+    const d = sample();
+    d.estimator.steps[0].fields.push(field);
+    expect(() => parseDocument(d)).toThrow();
+  }
+  const d = sample();
+  d.estimator.leadCapture = { mode: "before", fields: ["phone"] };
+  expect(() => parseDocument(d)).toThrow();
+});

@@ -290,6 +290,15 @@ export const estimatorSchema = z
   })
   .superRefine((e, ctx) => {
     const fail = (message: string) => ctx.addIssue({ code: "custom", message });
+    if (new Set(e.leadCapture.fields).size !== e.leadCapture.fields.length)
+      fail("Duplicate contact field");
+    if (
+      e.leadCapture.mode !== "disabled" &&
+      !["name", "email"].every((key) =>
+        e.leadCapture.fields.includes(key as "name" | "email"),
+      )
+    )
+      fail("Contact capture requires name and email");
     const fields = e.steps.flatMap((s) => s.fields);
     const fieldMap = new Map(fields.map((f) => [f.id, f]));
     for (const [name, items] of [
@@ -333,15 +342,40 @@ export const estimatorSchema = z
         ((isNumericField(field.type) &&
           (typeof v !== "number" ||
             v < 0 ||
+            (field.validation?.integer && !Number.isSafeInteger(v)) ||
             (field.validation?.min !== undefined && v < field.validation.min) ||
             (field.validation?.max !== undefined &&
               v > field.validation.max))) ||
           (["boolean", "checkbox"].includes(field.type) &&
             typeof v !== "boolean") ||
           (isChoiceField(field.type) &&
-            !(Array.isArray(v)
-              ? v.every((x) => field.choices?.some((c) => c.id === x))
-              : field.choices?.some((c) => c.id === v))))
+            !(field.type === "multiselect"
+              ? Array.isArray(v) &&
+                new Set(v).size === v.length &&
+                v.every((x) => field.choices?.some((c) => c.id === x))
+              : typeof v === "string" &&
+                field.choices?.some((c) => c.id === v))) ||
+          (![
+            "hidden",
+            "info",
+            "divider",
+            "boolean",
+            "checkbox",
+            ...numericFieldTypes,
+            ...choiceFieldTypes,
+          ].includes(field.type) &&
+            typeof v !== "string") ||
+          (typeof v === "string" &&
+            v.length > (field.validation?.maxLength ?? 2000)) ||
+          (field.type === "email" &&
+            (typeof v !== "string" || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))) ||
+          (field.type === "time" &&
+            (typeof v !== "string" || !/^([01]\d|2[0-3]):[0-5]\d$/.test(v))) ||
+          (field.type === "date" &&
+            (typeof v !== "string" ||
+              !/^\d{4}-\d{2}-\d{2}$/.test(v) ||
+              !Number.isFinite(Date.parse(`${v}T00:00:00Z`)) ||
+              new Date(`${v}T00:00:00Z`).toISOString().slice(0, 10) !== v)))
       )
         fail(`Invalid default value: ${field.id}`);
     }

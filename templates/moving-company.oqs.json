@@ -237,7 +237,9 @@
         "rule:boxes": "Caixas",
         "rule:piano": "Transporte de piano",
         "rule:packing": "Embalagem",
-        "rule:weekend": "Adicional de fim de semana"
+        "rule:weekend": "Adicional de fim de semana",
+        "placeholder:origin": "Rua, cidade e CEP",
+        "placeholder:destination": "Rua, cidade e CEP"
       }
     }
   }

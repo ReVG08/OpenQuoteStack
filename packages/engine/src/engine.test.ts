@@ -464,3 +464,43 @@ it("uses authored hidden values and validates email and time answers", () => {
     calculateEstimate(e, { email: "invalid", time: "25:00" }),
   ).toThrow(AnswerValidationError);
 });
+
+it("calculates the cleaning and agency templates without application pricing logic", () => {
+  const load = (name: string) =>
+    parseEstimator(
+      JSON.parse(
+        readFileSync(
+          new URL(`../../../templates/${name}.oqs.json`, import.meta.url),
+          "utf8",
+        ),
+      ),
+    );
+  const cleaning = calculateEstimate(load("residential-cleaning"), {
+    bedrooms: 3,
+    bathrooms: 2,
+    area: 1600,
+    frequency: "weekly",
+    deep: true,
+    oven: false,
+    windows: false,
+  });
+  expect(cleaning.totalMinor).toBe(27030);
+  expect(cleaning.appliedRules).toEqual([
+    "base",
+    "bedrooms",
+    "bathrooms",
+    "area",
+    "deep",
+    "weekly",
+  ]);
+  const agency = calculateEstimate(load("web-design-agency"), {
+    package: "growth",
+    pages: 6,
+    commerce: false,
+    booking: true,
+    copy: true,
+    rush: true,
+  });
+  expect(agency.totalMinor).toBe(622500);
+  expect(agency.range).toEqual({ minMinor: 560250, maxMinor: 747000 });
+});

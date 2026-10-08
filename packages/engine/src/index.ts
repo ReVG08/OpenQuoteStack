@@ -67,12 +67,18 @@ export function validateAnswers(
   estimator: Estimator,
   raw: Answers,
 ): { answers: Answers; visibleFields: string[] } {
+  assertDataBudget(raw);
+  if (!raw || typeof raw !== "object" || Array.isArray(raw))
+    throw new AnswerValidationError([
+      { field: "answers", message: "Answers must be an object" },
+    ]);
   const fields = estimator.steps.flatMap((s) => s.fields);
+  const knownFields = new Set(fields.map((f) => f.id));
   const issues: { field: string; message: string }[] = [];
   const answers: Answers = Object.create(null) as Answers;
   const visibleFields: string[] = [];
   for (const key of Object.keys(raw))
-    if (!fields.some((f) => f.id === key))
+    if (!knownFields.has(key))
       issues.push({ field: key, message: "Unknown field" });
   for (const field of fields) {
     if (field.visibleWhen && !evaluateCondition(field.visibleWhen, answers))
