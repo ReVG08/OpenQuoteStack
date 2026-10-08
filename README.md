@@ -9,6 +9,10 @@ operation needs PostgreSQL and no proprietary cloud service.
 
 ![OpenQuoteStack estimator builder with fictional Acme Moving data](docs/images/builder.png)
 
+Real application views with fictional data: [dashboard](docs/images/dashboard.png),
+[pricing rules](docs/images/pricing.png), [public calculator](docs/images/public-estimator.png),
+[Portuguese result](docs/images/result.png), and [analytics](docs/images/analytics.png).
+
 **0.2.0-alpha.1** is an early public preview. Core authoring, customer quoting and
 developer integrations work; account recovery, invitations and data-erasure
 workflows are still planned. Read the [limitations](#current-limitations) before

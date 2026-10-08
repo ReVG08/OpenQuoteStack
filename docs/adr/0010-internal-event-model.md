@@ -17,7 +17,8 @@ A message broker adds infrastructure before durable integrations exist. Calling 
 
 ## Consequences
 
-Events are best-effort, process-local and may be lost after a crash. Durable webhook/email delivery will require an outbox and retries. Audit history is durable; event delivery is not.
+In-process events are best-effort and may be lost after a crash. Audit history is durable.
+External webhook/email delivery uses the transactional outbox and retries described below.
 
 Durable external delivery is defined by [ADR-0016](0016-transactional-outbox-and-postgres-jobs.md).
 The in-process bus remains available for best-effort local subscribers.
