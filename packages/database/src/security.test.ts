@@ -3,7 +3,7 @@ import { isPublicAddress, publicAddresses, webhookUrl } from "./network";
 import { webhookSignature, verifyWebhookSignature } from "./webhook-signature";
 import { encryptSecret, decryptSecret } from "./crypto";
 import { localStorage, s3Storage, assetKey } from "./storage";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, rm } from "node:fs/promises";
 import { resolve } from "node:path";
 import { randomBytes } from "node:crypto";
 describe("outbound security", () => {
@@ -76,6 +76,7 @@ describe("outbound security", () => {
   });
 });
 it("isolates storage keys, bounds writes and prevents overwriting", async () => {
+  await mkdir(resolve(".local"), { recursive: true });
   const directory = await mkdtemp(resolve(".local/storage-test-")),
     store = localStorage(directory);
   try {
