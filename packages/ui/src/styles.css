@@ -434,9 +434,14 @@ hr {
   color: var(--muted);
 }
 .strong-link {
+  display: inline-block;
+  padding-block: 3px;
   font-weight: 600;
   text-decoration: none;
   color: var(--text);
+}
+.strong-link.mono {
+  white-space: nowrap;
 }
 .strong-link:hover {
   color: var(--accent);
@@ -1265,6 +1270,9 @@ hr {
   min-height: 100dvh;
   color: var(--public-ink);
   color-scheme: light;
+}
+.embed-page .public-page {
+  min-height: 0;
 }
 .public-header {
   max-width: 940px;

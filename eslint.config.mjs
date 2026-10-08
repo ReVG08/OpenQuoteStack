@@ -29,6 +29,22 @@ export default ts.config(
     settings: { next: { rootDir: "apps/web" } },
   },
   {
+    files: ["apps/web/public/*.js"],
+    languageOptions: {
+      globals: Object.fromEntries(
+        [
+          "document",
+          "window",
+          "location",
+          "URL",
+          "crypto",
+          "setTimeout",
+          "clearTimeout",
+        ].map((name) => [name, "readonly"]),
+      ),
+    },
+  },
+  {
     files: ["**/*.mjs"],
     languageOptions: { globals: { process: "readonly" } },
   },

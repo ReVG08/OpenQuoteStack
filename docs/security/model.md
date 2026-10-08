@@ -34,10 +34,10 @@ separate migration and restricted application credentials are a future hardening
 
 ## Current limits
 
-Registration is open. Account verification, reset-email delivery, MFA, invitations
+Registration is open by default; `OQS_DISABLE_REGISTRATION=true` closes new signups. Account verification, reset-email delivery, MFA, invitations
 and membership administration are not configured. Do not treat this application as
-a complete public account-management system. Rate limits live in process memory
-and are not shared across replicas. Events are not a durable delivery mechanism.
+a complete public account-management system. Rate limits use shared PostgreSQL buckets. Authentication uses its database-backed
+limiter. Outbox events and leased jobs provide durable integration delivery.
 Lead retention/export/deletion workflows still need a deliberate privacy design;
 snapshot deletion is intentionally blocked today and requires an explicit retention
 migration before supporting data erasure.
@@ -60,12 +60,40 @@ Prisma configuration, migrations, authentication tests and application builds.
 Public sessions use random, revision-pinned capabilities with a 24-hour lifetime.
 The server validates answers and calculates totals; repeat submissions are idempotent.
 Session capabilities grant no tenant reads. Views and progress do not store IP
-addresses or user agents. Public mutations have bounded in-process rate limits;
-a reverse proxy or shared limiter is needed for sustained abuse protection.
+addresses or user agents. Public mutations have shared per-capability and installation rate limits. An edge
+proxy can impose additional network abuse limits.
 
 Administrator image uploads require a matching origin and tenant permissions.
 PNG/JPEG/WebP uploads are limited to 2 MB and 20 million pixels, normalized to WebP
 and stripped of metadata. SVG and customer uploads are unsupported. Brand images
 are public. Paths are tenant-scoped and validated before filesystem access; PDF
-logos are read locally without remote fetching. Build tracing excludes private
+logos are read through the selected storage adapter without arbitrary URL fetching. Build tracing excludes private
 environment files, local data and Git internals.
+
+## Platform trust boundaries
+
+API secrets are cryptographically random and shown once; only hashes remain in
+PostgreSQL. Scope and organization checks happen server-side. API-created estimates
+are calculated from the selected published revision and deduplicated transactionally.
+Keys are intended for servers and must not be included in embeds or browser bundles.
+
+Webhook destinations require HTTPS/443, public hostnames and exclusively public
+DNS addresses. Every attempt rechecks DNS and pins a validated IP to the TLS
+connection. Redirects are not followed. DNS, connection and response deadlines bound
+resource use; retries stop after five attempts. Signing secrets use AES-256-GCM.
+Consumers verify timestamped HMAC over raw bytes and persist processed event IDs.
+
+Custom domains require TXT ownership and current public DNS. Unknown hosts and
+cross-tenant public routes return 404. Forwarded host headers do not determine tenant
+identity. Only embed routes permit framing, limited by tenant origin allowlists;
+resize messages check the sender window, origin and unpredictable channel identifier.
+
+SMTP configuration and S3 endpoints are trusted operator inputs, not customer or
+API-key-controlled destinations. TLS certificate checks remain enabled. SMTP only
+allows unencrypted delivery when explicitly configured for a trusted relay. Customer
+text is escaped in email. Files use generated names, validated tenant keys, bounded
+reads/writes and normalized raster data. SVG and executable uploads are excluded.
+
+Operator credentials, storage access policies, TLS and backup access remain external
+trust boundaries. No independent penetration test or certification is claimed.
+See [privacy and data flows](privacy.md) and [webhook verification](../platform/webhooks.md).

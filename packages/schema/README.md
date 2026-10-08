@@ -23,8 +23,8 @@ stable references. Visibility references preceding fields only. Conditions and
 formula ASTs are JSON data. Currency exponent is declared by the document author;
 confirm it against the intended currency rather than assuming two decimal places.
 
-See the [moving template](../../templates/moving-company.oqs.json) and
-[pricing semantics](../../docs/concepts/pricing.md). No web application imports
+See the [moving template](https://github.com/ReVG08/OpenQuoteStack/blob/main/templates/moving-company.oqs.json) and
+[pricing semantics](https://github.com/ReVG08/OpenQuoteStack/blob/main/docs/concepts/pricing.md). No web application imports
 are needed. License: AGPL-3.0-only.
 
 Supported field types include text/textarea, number/currency/quantity/slider,
@@ -38,3 +38,6 @@ and optional expiration days. Enabled capture requires name and email. These are
 version-1 authoring additions; older strict readers can reject unsupported fields.
 Use compatible package releases rather than assuming forward compatibility from
 the schema version alone.
+
+This package is ESM with generated TypeScript declarations. Node.js 20+ is supported;
+repository verification uses Node.js 24. External package publication is separate.

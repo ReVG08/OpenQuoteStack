@@ -1,0 +1,16 @@
+name: Integration request
+description: Propose an API, SDK or integration capability.
+body:
+  - type: input
+    id: system
+    attributes:
+      label: System or API
+    validations:
+      required: true
+  - type: textarea
+    id: flow
+    attributes:
+      label: Data flow and use case
+      description: Describe events, authentication and destination requirements without credentials.
+    validations:
+      required: true

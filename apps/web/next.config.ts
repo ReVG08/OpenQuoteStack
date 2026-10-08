@@ -4,6 +4,7 @@ import { loadEnvFile } from "node:process";
 import { existsSync } from "node:fs";
 const envPath = resolve(import.meta.dirname, "../../.env");
 if (existsSync(envPath)) loadEnvFile(envPath);
+process.env.NEXT_TELEMETRY_DISABLED = "1";
 const config: NextConfig = {
   agentRules: false,
   logging: { serverFunctions: false },
@@ -17,16 +18,19 @@ const config: NextConfig = {
   async headers() {
     return [
       {
-        source: "/((?!embed/).*)",
+        source: "/:path*",
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "X-Frame-Options", value: "DENY" },
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
         ],
+      },
+      {
+        source: "/((?!embed/).*)",
+        headers: [{ key: "X-Frame-Options", value: "DENY" }],
       },
     ];
   },

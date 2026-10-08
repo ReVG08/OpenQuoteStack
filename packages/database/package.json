@@ -1,6 +1,6 @@
 {
   "name": "@openquotestack/database",
-  "version": "0.1.0",
+  "version": "0.2.0-alpha.1",
   "private": true,
   "type": "module",
   "exports": {
@@ -22,18 +22,20 @@
     "@openquotestack/core": "workspace:*",
     "@openquotestack/engine": "workspace:*",
     "@openquotestack/schema": "workspace:*",
+    "@openquotestack/sdk": "workspace:*",
     "@prisma/adapter-pg": "7.10.0",
     "@prisma/client": "7.10.0",
     "dotenv": "^17.3.0",
     "ipaddr.js": "^2.5.0",
     "nodemailer": "^10.0.16",
     "pg": "^8.18.0",
+    "prisma": "7.10.0",
+    "tsx": "^4.23.15",
     "zod": "4.6.5"
   },
   "devDependencies": {
     "@types/nodemailer": "^8.0.2",
-    "@types/pg": "^8.16.0",
-    "prisma": "7.10.0"
+    "@types/pg": "^8.16.0"
   },
   "license": "AGPL-3.0-only"
 }

@@ -24,7 +24,7 @@ import {
 } from "./money.js";
 export { evaluateCondition } from "./conditions.js";
 export { parseFormula } from "./formula.js";
-export const ENGINE_VERSION = "0.2.0";
+export const ENGINE_VERSION = "0.2.0-alpha.1";
 export class AnswerValidationError extends Error {
   constructor(public readonly issues: { field: string; message: string }[]) {
     super("Invalid estimator answers");

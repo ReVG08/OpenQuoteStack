@@ -57,7 +57,10 @@ export default async function Leads({
                 {lead.phone && <p>{lead.phone}</p>}
                 {lead.company && <p>{lead.company}</p>}
                 {monetaryGroups(items.map((l) => l.estimate)).map((g) => (
-                  <div className="lead-value" key={`${g.currency}:${g.minorUnits}`}>
+                  <div
+                    className="lead-value"
+                    key={`${g.currency}:${g.minorUnits}`}
+                  >
                     <small>{t("opportunity")}</small>
                     <strong>
                       {formatMoney(g.total, g.currency, g.minorUnits, locale)}

@@ -31,5 +31,5 @@ add infrastructure and disclose activity beyond the installation.
 New publication does not invalidate an in-progress session; archiving or unpublishing
 blocks submissions. Tokens authorize only that session's progress and contact
 submission, never tenant reads. Conversion reporting measures sessions rather than
-unique people. Durable abuse controls and retention policies remain deployment
-responsibilities.
+unique people. Shared database limits constrain capability writes. Network-edge abuse controls
+and retention policies remain deployment responsibilities.

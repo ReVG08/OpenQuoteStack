@@ -1,14 +1,16 @@
-import { beforeAll, afterAll, describe, it, expect } from "vitest";
+import { beforeAll, afterAll, describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { SMTPServer } from "smtp-server";
 import { randomBytes } from "node:crypto";
 import { createDatabase } from "./index";
 import { createServices } from "./services";
 import { createPlatform } from "./platform";
-import { dispatchOutbox, runJob } from "./worker";
+import { dispatchOutbox, runJob, maintainWorker } from "./worker";
 import { encryptSecret, decryptSecret } from "./crypto";
 import { verifyWebhookSignature } from "./webhook-signature";
 import { EventBus } from "@openquotestack/core";
+const dns = vi.hoisted(() => ({ lookup: vi.fn(), resolveTxt: vi.fn() }));
+vi.mock("node:dns/promises", () => dns);
 const url = process.env.DATABASE_TEST_URL;
 if (!url || !new URL(url).pathname.endsWith("_test"))
   throw new Error("Disposable test database required");
@@ -293,6 +295,40 @@ describe("scoped platform", () => {
       ])
         delete process.env[key];
     }
+  });
+  it("verifies domain ownership and revokes routing when DNS becomes private", async () => {
+    const domain = await platform.createDomain(
+      actor,
+      org,
+      "quote.acme.example.com",
+    );
+    dns.lookup.mockResolvedValue([{ address: "8.8.8.8", family: 4 }]);
+    dns.resolveTxt.mockResolvedValue([[`v=OQS1;token=${domain.verifyToken}`]]);
+    await expect(
+      platform.verifyDomain(other, org, domain.id),
+    ).rejects.toThrow();
+    expect((await platform.verifyDomain(actor, org, domain.id)).status).toBe(
+      "active",
+    );
+    await db.customDomain.update({
+      where: { id: domain.id },
+      data: { checkedAt: new Date(0) },
+    });
+    dns.lookup.mockResolvedValue([{ address: "127.0.0.1", family: 4 }]);
+    await maintainWorker(db, "domain-test-worker");
+    expect(
+      (await db.customDomain.findUniqueOrThrow({ where: { id: domain.id } }))
+        .status,
+    ).toBe("error");
+    dns.lookup.mockResolvedValue([{ address: "8.8.8.8", family: 4 }]);
+    dns.resolveTxt.mockResolvedValue([["v=OQS1;token=wrong-owner"]]);
+    expect((await platform.verifyDomain(actor, org, domain.id)).status).toBe(
+      "error",
+    );
+    await expect(
+      platform.removeDomain(actor, foreign, domain.id),
+    ).rejects.toThrow();
+    await platform.removeDomain(actor, org, domain.id);
   });
   it("limits requests and revokes credentials", async () => {
     await platform.consumeRate("test-limit", 1);

@@ -1,0 +1,21 @@
+name: Template contribution
+description: Propose a portable service estimator.
+body:
+  - type: input
+    id: category
+    attributes:
+      label: Template name and service category
+    validations:
+      required: true
+  - type: textarea
+    id: pricing
+    attributes:
+      label: Inputs, pricing and conditions
+      description: Use fictional prices and explain their measurement units.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation and translations
+      description: Read docs/concepts/templates.md and describe expected example calculations.

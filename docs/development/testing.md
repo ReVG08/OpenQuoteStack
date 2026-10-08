@@ -38,8 +38,9 @@ an installation's TLS, backups, proxy settings or production readiness.
 
 The browser verification tool is a development dependency. Install its browser with
 `pnpm exec agent-browser install`. Check authentication, organization creation,
-publication and server-backed estimate saving when modifying app flows. Screenshots,
-browser state and local databases belong under ignored `.local/`, not source control.
+publication and server-backed estimate saving when modifying app flows. Private browser state, temporary screenshots and local databases belong under
+ignored `.local/`. Reviewed product screenshots using fictional data may be stored
+in `docs/images/`.
 
 ESLint 9 is pinned for compatibility with the current Next.js React/accessibility
 plugins. Move to ESLint 10 when those plugins support its removed context APIs.
@@ -54,3 +55,14 @@ manual keyboard/focus and visual checks remain necessary.
 
 Test discovery is restricted to source package/application directories so generated
 standalone server copies cannot be collected as duplicate suites.
+
+Platform tests cover API hashes/scopes/revocation, manipulated tenant IDs, idempotent
+HTTP/SDK submissions, transactional events, signed delivery retries and a real local
+SMTP fixture. Security tests exercise unsafe addresses, DNS pinning, redirects,
+timeouts, storage bounds and public-domain/embed routing. Fixture messages stay on
+loopback; tests do not email customers or call real webhook destinations.
+
+Before packaging, build public packages and inspect their tarballs. Install all three
+into an isolated consumer and check runtime imports and TypeScript declarations.
+The packages are ESM. Test deployments separately from development servers, including
+migrations, worker health, restart persistence and the public `/health` response.

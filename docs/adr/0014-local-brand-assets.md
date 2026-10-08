@@ -28,3 +28,6 @@ risks in PDFs. Embedded base64 images enlarge every organization response.
 Brand images are public resources, not private document storage. Backups need both
 PostgreSQL and the asset directory. Multiple web instances need a shared filesystem
 or a future storage adapter. Uploading customer documents and SVG is unsupported.
+
+[ADR-0019](0019-brand-asset-storage-adapters.md) extends this boundary with an
+S3-compatible adapter while preserving the default filesystem behavior.

@@ -52,9 +52,20 @@ Historical display and PDF generation use the retained calculation. Replaying wi
 a newer engine can change semantics; preserve the matching engine release for exact
 reproduction. Retention and erasure need an explicit migration and privacy policy.
 
-## Future boundaries
+## Platform records
 
-API keys should hold hashes and tenant-scoped capabilities. Webhook endpoints need
-organization ownership, signing secrets and durable delivery attempts. Neither has
-a table, REST interface or management UI yet. Branding remains validated JSON on
-the organization. Multi-instance image storage needs a shared volume or adapter.
+API keys belong to one organization and store a SHA-256 hash, visible prefix, scopes,
+creation/use times and revocation. API submissions pair a key and request identity
+with a retained estimate, preventing duplicate writes during retries.
+
+Outbox events capture stable resource representations in the business transaction.
+Webhook endpoints store encrypted signing secrets. Deliveries retain attempt counts,
+HTTP status, duration and safe failure categories. Background jobs have due times,
+leases and bounded retry counts. Worker heartbeats and rate buckets are technical
+installation records; business jobs and event records are organization-owned.
+
+Custom domains have globally unique hostnames, ownership tokens and verification
+states. Branding, notification settings and embedding origins remain validated
+organization configuration. Public brand assets use generated tenant-scoped keys in
+the configured storage adapter. Secrets and customer records are never exported in
+portable estimator files.

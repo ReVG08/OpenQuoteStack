@@ -1,6 +1,6 @@
 {
   "name": "@openquotestack/sdk",
-  "version": "0.1.0",
+  "version": "0.2.0-alpha.1",
   "type": "module",
   "license": "AGPL-3.0-only",
   "files": [
@@ -34,5 +34,23 @@
     "type": "git",
     "url": "git+https://github.com/ReVG08/OpenQuoteStack.git",
     "directory": "packages/sdk"
-  }
+  },
+  "description": "Typed OpenQuoteStack REST client and webhook verification for server applications.",
+  "engines": {
+    "node": ">=20"
+  },
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "homepage": "https://github.com/ReVG08/OpenQuoteStack",
+  "bugs": {
+    "url": "https://github.com/ReVG08/OpenQuoteStack/issues"
+  },
+  "keywords": [
+    "openquotestack",
+    "pricing",
+    "quotes",
+    "self-hosted",
+    "typescript"
+  ]
 }

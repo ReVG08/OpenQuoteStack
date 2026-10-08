@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { getDatabase } from "../src/index.js";
 import { createServices } from "../src/services.js";
 import { parseDocument, type Answers } from "@openquotestack/schema";
@@ -98,7 +99,12 @@ try {
       const doc = parseDocument(
           JSON.parse(
             readFileSync(
-              new URL(`../../../templates/${name}.oqs.json`, import.meta.url),
+              process.env.OQS_TEMPLATE_DIR
+                ? resolve(process.env.OQS_TEMPLATE_DIR, `${name}.oqs.json`)
+                : new URL(
+                    `../../../templates/${name}.oqs.json`,
+                    import.meta.url,
+                  ),
               "utf8",
             ),
           ),

@@ -88,6 +88,7 @@ export default async function PlatformPage({
         ))}
       </nav>
       <PlatformPanel
+        key={`${organizationId}:${section}`}
         org={organizationId}
         locale={locale}
         section={section}

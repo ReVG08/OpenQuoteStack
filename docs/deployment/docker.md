@@ -1,51 +1,77 @@
-# Docker deployment
+# Docker Compose
 
-Docker Compose defines three services: `db`, `migrate` and `web`. PostgreSQL must
-pass its readiness check before migrations run. The application starts only after
-migration success. The web health check also checks database connectivity.
+Compose runs PostgreSQL, a one-shot migration service, the web application and a
+background worker. Database readiness precedes migrations; successful migrations
+precede web and worker startup. Health checks cover database, web connectivity and
+a recent worker heartbeat. PostgreSQL and normalized brand assets use named volumes.
 
-Copy `.env.example` to `.env`, replace the password and authentication secret, and
-keep the PostgreSQL password consistent with `DATABASE_URL` for local CLI access.
-Use hex credentials or correctly URL-encode special characters in connection URLs.
-Compose constructs its internal database URL using the `db` hostname. The CLI uses
-the loopback URL in `.env`.
+## First installation
 
 ```sh
+cp .env.example .env
+# Replace POSTGRES_PASSWORD, BETTER_AUTH_SECRET and OQS_ENCRYPTION_KEY.
+# Match the password in DATABASE_URL. Use 64-character random hex values.
 docker compose up -d --build
 docker compose ps
-docker compose logs migrate web
+docker compose logs --tail=100 migrate web worker
+curl --fail http://localhost:3000/health
 ```
 
-PostgreSQL 18 stores persistent data under `/var/lib/postgresql`; Compose mounts a
-named volume at that path. `docker compose down` retains data. Removing volumes is destructive. The `brand_assets` volume stores normalized
-logos and icons under `/app/data/assets`; back it up with the database. Back up with PostgreSQL tools and test restoration separately.
-Do not change a PostgreSQL major-version image over an existing data directory
-without following its upgrade procedure.
+Alternatively, after installing Node.js 24 and dependencies, `pnpm setup:env`
+generates a mode-600 environment file with unique credentials. It refuses to
+replace an existing file. For HTTPS use `pnpm setup:env --url https://quotes.example.com`.
+Never copy example secret values into a public installation.
 
-The Dockerfile builds workspace packages and a standalone Next.js server. The
-runtime target runs as the image's non-root `node` user. The migration target has
-Prisma and development tools needed by the CLI; it is a separate one-shot service,
-not the web runtime. No secret is baked into the image.
+Register an account at the configured origin. Create an organization, select a
+template and publish. Optional fictional seed data needs an existing account:
 
-Both database and application ports bind to loopback. To expose an installation,
-put an HTTPS reverse proxy in front of the application, set `BETTER_AUTH_URL` to the
-exact public HTTPS origin, and forward the original host and protocol consistently.
-Keep PostgreSQL private. Authentication rejects public production HTTP origins;
-localhost HTTP remains usable for local evaluation. Secure cookies are enabled
-for HTTPS origins.
+```sh
+docker compose run --rm -e SEED_DEMO=1 -e SEED_OWNER_EMAIL=owner@example.com migrate pnpm seed
+```
 
-The current auth rate limiter is in-process. Multi-instance hosting requires shared
-rate limiting or an edge proxy policy. Registration is open and email verification,
-password reset delivery, invitations and SMTP are not configured. Plan those access
-and recovery controls before a public deployment. See the
-[security model](../security/model.md).
+No default credentials are installed. Disable public registration after setup if
+appropriate. SMTP is optional; queue processing is part of the worker. Redis is
+not required. See [configuration](configuration.md) and [SMTP/storage](../platform/storage-and-email.md).
 
-For upgrades, back up first, review migrations and changelog, then rebuild. If the
-migration service has already exited, use `docker compose up -d --build --force-recreate`
-to recreate services. Rollback of application binaries is distinct from estimator
-revision rollback and may require compatible database changes.
+## Network and persistence
 
-Local non-container development uses `OQS_ASSET_DIR` (default `.local/assets`
-relative to the web process). Use an absolute path when CLI and application working
-directories differ. Container replicas need a shared asset mount. Uploaded assets
-are public; keep private files out of this directory.
+Web and database host ports bind to loopback. `OQS_WEB_PORT` and `OQS_DB_PORT`
+change host ports; container ports remain 3000 and 5432. `BETTER_AUTH_URL` is the
+exact browser-facing origin, including a local alternate port. Compose constructs
+its database URL with the `db` hostname; CLI access uses the local `DATABASE_URL`.
+Hex passwords avoid URL escaping errors.
+
+Use an HTTPS reverse proxy for public access and keep PostgreSQL private. Preserve
+the incoming `Host` and protocol. See [Linux/proxies](linux.md) and
+[custom domains](../platform/domains.md). TLS, DNS and firewall configuration are
+operator responsibilities. Local loopback HTTP is supported for evaluation.
+
+PostgreSQL 18 persists under `/var/lib/postgresql`. `docker compose down` retains
+volumes; removing volumes destroys data. Local assets persist under `/app/data/assets`.
+Back up both data volumes and the encryption key. S3 installations back up object
+storage instead of the local asset volume. Do not switch a database major-version
+image over an existing data directory without its documented upgrade process.
+
+## Images and operations
+
+The web image contains the standalone Next.js server. Migration and worker images
+use a production-only service dependency bundle, not the development workspace.
+All application services run as the non-root `node` user. Build context excludes
+environment files, local databases, Git and generated outputs. Secrets enter only
+through runtime environment variables.
+
+```sh
+docker compose restart web worker
+docker compose logs --tail=100 worker
+docker compose ps
+```
+
+Worker failures retain jobs for bounded retries and expose safe error categories.
+A heartbeat confirms worker activity, not delivery success to every integration.
+Owners/admins can inspect their organization's failed job count under System and
+webhook attempts under Webhooks. SMTP status reports configuration, not a live
+provider delivery guarantee.
+
+Read [backups and upgrades](maintenance.md) before changing images or migrations.
+Compose is the reference deployment. Hosting-panel recipes are configuration
+examples; they are not independently verified installation certifications.

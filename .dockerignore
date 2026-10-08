@@ -12,3 +12,12 @@ node_modules
 coverage
 test-results
 **/next-env.d.ts
+docs
+.github
+examples
+README.md
+CONTRIBUTING.md
+CHANGELOG.md
+ROADMAP.md
+SECURITY.md
+CODE_OF_CONDUCT.md

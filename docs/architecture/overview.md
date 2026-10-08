@@ -15,7 +15,12 @@ flowchart LR
   Engine --> Schema[Schema]
   Services --> Events[After-commit events]
   Preview[Shared preview renderer] --> Engine
-  SDK[Local SDK] --> Engine
+  SDK[SDK] --> API[Scoped REST API]
+  API --> Services
+  SDK --> Engine
+  Services --> Outbox[Transactional outbox]
+  Outbox --> Jobs[PostgreSQL jobs]
+  Jobs --> Integrations[Signed webhooks and SMTP]
   PDF[PDF renderer] --> Retained[Retained calculation]
 ```
 
@@ -66,9 +71,22 @@ review all template prices before publishing. Date-only pricing inputs represent
 business calendar dates; display timestamps use the organization's timezone.
 
 Branding is validated organization data. Colors determine readable foregrounds.
-Uploads are normalized local images; PDF generation never fetches remote logos.
+Uploads are normalized images stored through local filesystem or S3 adapters; PDF
+generation reads the configured adapter without fetching arbitrary logo URLs.
 Docker persists PostgreSQL and brand assets in separate volumes. Both need backups.
 
-Internal events run after commit and are best-effort. Audit records commit with
-writes. Durable integrations need an outbox or delivery queue. Secrets initialize
-lazily on the server; builds require neither credentials nor a running database.
+In-process events run after commit. Audit entries and outbox records commit with
+writes. A separate worker claims PostgreSQL jobs using leases and `SKIP LOCKED`;
+webhooks and SMTP retry independently of customer submissions. Delivery is at least
+once. Consumers deduplicate event IDs. Redis is not required.
+
+The versioned REST API uses hashed, scoped tenant credentials rather than browser
+sessions. API submissions retain an idempotency record and immutable result. SDK
+HTTP calls never include browser cookies. Integration secrets use authenticated
+encryption with a separately backed-up deployment key.
+
+Custom domains require public DNS and a tenant ownership TXT token, with periodic
+reverification. Host routing grants public calculator access only. Embeds use
+organization frame allowlists and origin/source/channel-checked resize messages.
+Builds require neither credentials nor a running database. Web, migration and worker
+containers run as non-root users; migrations and workers use production dependencies.

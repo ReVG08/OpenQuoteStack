@@ -25,11 +25,11 @@ export default async function Embed({
   if (parentOrigin && !allowed.includes(parentOrigin)) notFound();
   if (channel && !/^[a-zA-Z0-9_-]{1,100}$/.test(channel)) notFound();
   return (
-    <>
+    <div className="embed-page">
       <PublicEstimator params={params} />
       {parentOrigin && channel && (
         <EmbedResize origin={parentOrigin} channel={channel} />
       )}
-    </>
+    </div>
   );
 }

@@ -306,7 +306,7 @@ export async function maintainWorker(db: PrismaClient, id: string) {
         equalSecret(parts.join(""), `v=OQS1;token=${domain.verifyToken}`),
       );
     } catch {
-      /* DNS failures revoke verified routing until ownership is checked again. */
+      active = false;
     }
     await db.customDomain.update({
       where: { id: domain.id },
