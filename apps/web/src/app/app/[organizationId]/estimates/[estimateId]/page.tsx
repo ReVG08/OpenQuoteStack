@@ -1,3 +1,5 @@
+import { LeadEditor } from "@/components/lead-editor";
+import { SendEstimate } from "@/components/send-estimate";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { workspace } from "@/lib/workspace";
@@ -98,6 +100,20 @@ export default async function Estimate({
             {quote.lead ? (
               <>
                 <h3>{quote.lead.name}</h3>
+                {hasPermission(role, "estimate.manage") && (
+                  <LeadEditor
+                    org={organizationId}
+                    lead={quote.lead}
+                    pt={locale === "pt-BR"}
+                  />
+                )}
+                {hasPermission(role, "estimate.manage") && (
+                  <SendEstimate
+                    org={organizationId}
+                    id={estimateId}
+                    pt={locale === "pt-BR"}
+                  />
+                )}
                 <a href={`mailto:${quote.lead.email}`}>{quote.lead.email}</a>
                 {quote.lead.phone && <p>{quote.lead.phone}</p>}
                 {quote.lead.company && <p>{quote.lead.company}</p>}

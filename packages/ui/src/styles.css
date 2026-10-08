@@ -2003,3 +2003,111 @@ dialog::backdrop {
     scroll-behavior: auto !important;
   }
 }
+
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
+  padding-bottom: 8px;
+}
+.settings-tabs a {
+  padding: 9px 12px;
+  white-space: nowrap;
+  color: var(--muted);
+  font-size: 0.875rem;
+  text-decoration: none;
+  border-radius: 6px;
+}
+.settings-tabs a[aria-current="page"],
+.settings-tabs a:hover {
+  color: var(--text);
+  background: var(--panel);
+}
+.platform-stack {
+  display: grid;
+  gap: 24px;
+  max-width: 900px;
+}
+.platform-stack .panel,
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 24px;
+  background: var(--panel);
+}
+.platform-stack form {
+  display: grid;
+  gap: 16px;
+  max-width: 620px;
+}
+.platform-stack fieldset {
+  border: 1px solid var(--line);
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 400;
+}
+.check-label input {
+  width: auto;
+}
+.integration-row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding: 16px 0;
+  overflow-wrap: anywhere;
+}
+.integration-row:last-child {
+  border-bottom: 0;
+}
+.integration-row p {
+  margin: 6px 0;
+}
+.integration-row small {
+  color: var(--muted);
+}
+.secret-panel {
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--accent);
+  padding: 20px;
+  border-radius: 8px;
+}
+.secret-panel input {
+  font-family: ui-monospace, monospace;
+}
+.button-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+@media (max-width: 640px) {
+  .integration-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .platform-stack .panel,
+  .panel {
+    padding: 18px;
+  }
+}
+.contact-editor summary {
+  cursor: pointer;
+  color: var(--accent);
+  margin: 12px 0;
+}
+.contact-editor form {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}

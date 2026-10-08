@@ -66,6 +66,10 @@ it("runs the published estimate journey through the SDK and HTTP contract", asyn
   const page = await sdk.estimators.list({ limit: 1 });
   expect(page.data[0]!.id).toBe(id);
   expect(page.pagination.limit).toBe(1);
+  expect(page.data[0]!.publishedRevision).not.toHaveProperty("definition");
+  expect(
+    (await sdk.estimators.get(id)).publishedRevision!.definition.schemaVersion,
+  ).toBe("1");
   const input = {
     estimatorId: id,
     answers: {
@@ -84,6 +88,13 @@ it("runs the published estimate journey through the SDK and HTTP contract", asyn
     idempotencyKey: "http-api-request-one",
   });
   expect(quote.result.totalMinor).toBe(70863);
+  const estimates = await sdk.estimates.list();
+  expect(estimates.data[0]).toMatchObject({
+    id: quote.id,
+    totalMinor: 70863,
+    currency: "USD",
+  });
+  expect(estimates.data[0]).not.toHaveProperty("answers");
   expect((await sdk.estimates.get(quote.id)).revision.id).toBe(
     quote.revision.id,
   );

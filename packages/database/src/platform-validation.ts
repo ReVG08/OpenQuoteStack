@@ -1,20 +1,10 @@
 import { z } from "zod";
-export const apiScopes = [
-  "estimators:read",
-  "estimates:read",
-  "estimates:write",
-  "leads:read",
-  "webhooks:manage",
-] as const;
-export type ApiScope = (typeof apiScopes)[number];
-export const webhookEvents = [
-  "estimate.created",
-  "estimate.completed",
-  "lead.created",
-  "lead.updated",
-  "estimate.status_changed",
-  "estimator.published",
-] as const;
+import {
+  apiScopes,
+  webhookEvents,
+  type ApiScope,
+} from "@openquotestack/sdk/api-types";
+export { apiScopes, webhookEvents, type ApiScope };
 export const keyInput = z.strictObject({
   name: z.string().trim().min(1).max(100),
   description: z.string().max(500).optional(),

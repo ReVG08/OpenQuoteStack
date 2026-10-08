@@ -1,11 +1,10 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { dirname } from "node:path";
 import { randomUUID } from "node:crypto";
 import sharp from "sharp";
 import { requireActor } from "@/lib/session";
 import { services } from "@/lib/services";
 import { hasPermission } from "@openquotestack/core";
-import { assetFile } from "@/lib/assets";
+import { assetKey, getAssetStorage } from "@/lib/assets";
+import { boundedBody } from "@/lib/request-body";
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ organizationId: string }> },
@@ -23,7 +22,10 @@ export async function POST(
       role = await services().getRole(actor, organizationId);
     if (!hasPermission(role, "organization.manage"))
       return Response.json({ error: "Access denied" }, { status: 403 });
-    const data = await request.formData(),
+    const bounded = await boundedBody(request, 2200000);
+    const data = await new Response(Uint8Array.from(bounded), {
+        headers: { "Content-Type": request.headers.get("content-type") ?? "" },
+      }).formData(),
       file = data.get("file");
     if (!(file instanceof File) || file.size > 2000000)
       return Response.json({ error: "Invalid image" }, { status: 400 });
@@ -44,10 +46,8 @@ export async function POST(
       })
       .webp({ quality: 85 })
       .toBuffer();
-    const filename = `${randomUUID()}.webp`,
-      path = assetFile(organizationId, filename);
-    await mkdir(dirname(path), { recursive: true });
-    await writeFile(path, image, { flag: "wx", mode: 0o640 });
+    const filename = `${randomUUID()}.webp`;
+    await getAssetStorage().put(assetKey(organizationId, filename), image);
     return Response.json({ url: `/assets/${organizationId}/${filename}` });
   } catch {
     return Response.json({ error: "Upload failed" }, { status: 400 });

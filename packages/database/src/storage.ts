@@ -106,12 +106,18 @@ let storage: AssetStorage | undefined;
 export function getAssetStorage(): AssetStorage {
   if (storage) return storage;
   if (process.env.OQS_STORAGE_DRIVER === "s3") {
+    if (
+      Boolean(process.env.S3_ACCESS_KEY_ID) !==
+      Boolean(process.env.S3_SECRET_ACCESS_KEY)
+    )
+      throw new Error("Both S3 credential fields are required");
     storage = s3Storage(
       new S3Client({
         region: process.env.S3_REGION ?? "us-east-1",
         endpoint: process.env.S3_ENDPOINT || undefined,
         forcePathStyle: process.env.S3_FORCE_PATH_STYLE === "true",
         maxAttempts: 3,
+        requestHandler: { connectionTimeout: 5000, requestTimeout: 15000 },
         ...(process.env.S3_ACCESS_KEY_ID && process.env.S3_SECRET_ACCESS_KEY
           ? {
               credentials: {

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { workspace } from "@/lib/workspace";
 import { hasPermission } from "@openquotestack/core";
@@ -12,18 +13,39 @@ export default async function Settings({
     { organization: o, locale, role } = await workspace(organizationId);
   if (!hasPermission(role, "organization.manage")) notFound();
   return (
-    <BrandingEditor
-      orgId={o.id}
-      locale={locale}
-      settings
-      initial={{
-        name: o.name,
-        slug: o.slug,
-        locale,
-        timezone: o.timezone,
-        defaultCurrency: o.defaultCurrency,
-        branding: brandingOf(o.branding),
-      }}
-    />
+    <>
+      <nav
+        className="settings-tabs"
+        aria-label={locale === "pt-BR" ? "Integrações" : "Integrations"}
+      >
+        <Link href={`/app/${o.id}/settings/api-keys`}>API</Link>
+        <Link href={`/app/${o.id}/settings/webhooks`}>Webhooks</Link>
+        <Link href={`/app/${o.id}/settings/domains`}>
+          {locale === "pt-BR" ? "Domínios" : "Domains"}
+        </Link>
+        <Link href={`/app/${o.id}/settings/integrations`}>
+          {locale === "pt-BR" ? "E-mail e incorporação" : "Email & embedding"}
+        </Link>
+        <Link href={`/app/${o.id}/settings/audit`}>
+          {locale === "pt-BR" ? "Auditoria" : "Audit log"}
+        </Link>
+        <Link href={`/app/${o.id}/settings/system`}>
+          {locale === "pt-BR" ? "Sistema" : "System"}
+        </Link>
+      </nav>
+      <BrandingEditor
+        orgId={o.id}
+        locale={locale}
+        settings
+        initial={{
+          name: o.name,
+          slug: o.slug,
+          locale,
+          timezone: o.timezone,
+          defaultCurrency: o.defaultCurrency,
+          branding: brandingOf(o.branding),
+        }}
+      />
+    </>
   );
 }

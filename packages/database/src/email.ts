@@ -74,7 +74,8 @@ export async function estimateEmail(
     .filter(Boolean)
     .join(" · ");
   const definition = parseDocument(quote.revision.definition).estimator;
-  const terms = definition.output.terms ?? "";
+  const terms =
+    definition.translations?.[locale]?.terms ?? definition.output.terms ?? "";
   const logo = brand.logo?.startsWith(`/assets/${orgId}/`)
     ? new URL(
         brand.logo,
@@ -95,7 +96,10 @@ export async function estimateEmail(
     quote.lead?.name ?? "",
     leadContact,
     summary,
-    ...ordered.map((l) => `${l.label}: ${money(l.amountMinor)}`),
+    ...ordered.map(
+      (l) =>
+        `${definition.translations?.[locale]?.[`rule:${l.ruleId}`] ?? l.label}: ${money(l.amountMinor)}`,
+    ),
     `${locale === "pt-BR" ? "Total" : "Total"}: ${money(result.totalMinor)}`,
     terms,
     settings.footer,
@@ -103,7 +107,7 @@ export async function estimateEmail(
   ]
     .filter(Boolean)
     .join("\n");
-  const html = `<!doctype html><html lang="${locale}"><body style="margin:0;background:#f6f8f6;color:#202b25;font-family:Arial,sans-serif"><main style="max-width:560px;margin:32px auto;padding:32px;background:#fff;border-top:4px solid ${brand.primaryColor ?? "#176653"}">${logo ? `<img src="${escape(logo)}" alt="${escape(business)}" width="170" style="max-width:170px;height:auto"/>` : ""}<h2>${escape(business)}</h2><p>${escape(heading)} · ${escape(ref)}</p><p>${escape(quote.lead?.name ?? "")}</p><p>${escape(leadContact)}</p><h1>${escape(summary)}</h1><table style="width:100%">${ordered.map((l) => `<tr><td style="padding:8px 0">${escape(l.label)}</td><td style="text-align:right">${escape(money(l.amountMinor))}</td></tr>`).join("")}</table><p><strong>Total: ${escape(money(result.totalMinor))}</strong></p><p>${escape(terms)}</p><p>${escape(settings.footer)}</p><p style="color:#607068">${escape(contact)}</p></main></body></html>`;
+  const html = `<!doctype html><html lang="${locale}"><body style="margin:0;background:#f6f8f6;color:#202b25;font-family:Arial,sans-serif"><main style="max-width:560px;margin:32px auto;padding:32px;background:#fff;border-top:4px solid ${brand.primaryColor ?? "#176653"}">${logo ? `<img src="${escape(logo)}" alt="${escape(business)}" width="170" style="max-width:170px;height:auto"/>` : ""}<h2>${escape(business)}</h2><p>${escape(heading)} · ${escape(ref)}</p><p>${escape(quote.lead?.name ?? "")}</p><p>${escape(leadContact)}</p><h1>${escape(summary)}</h1><table style="width:100%">${ordered.map((l) => `<tr><td style="padding:8px 0">${escape(definition.translations?.[locale]?.[`rule:${l.ruleId}`] ?? l.label)}</td><td style="text-align:right">${escape(money(l.amountMinor))}</td></tr>`).join("")}</table><p><strong>Total: ${escape(money(result.totalMinor))}</strong></p><p>${escape(terms)}</p><p>${escape(settings.footer)}</p><p style="color:#607068">${escape(contact)}</p></main></body></html>`;
   return {
     from: process.env.SMTP_FROM!,
     to: recipient,

@@ -1,3 +1,4 @@
+import { consumeRate } from "./platform-context";
 import { randomUUID } from "node:crypto";
 import { resolveTxt } from "node:dns/promises";
 import { type PrismaClient } from "./index";
@@ -190,6 +191,11 @@ export async function runJob(
         });
       }
     } else if (job.kind === "email") {
+      try {
+        await consumeRate(db, `email-delivery:${job.organizationId}`, 20);
+      } catch {
+        throw new DeliveryFailure("email_rate_limited");
+      }
       const message = await estimateEmail(
         db,
         job.organizationId,

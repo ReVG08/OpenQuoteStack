@@ -7,6 +7,21 @@ import type {
   Lead,
   WebhookEndpoint,
 } from "./generated/prisma/client";
+export function estimatorSummary(
+  e: Estimator & {
+    publishedRevision: Pick<EstimatorRevision, "id" | "number"> | null;
+  },
+) {
+  return {
+    id: e.id,
+    name: e.name,
+    status: e.status,
+    updatedAt: e.updatedAt.toISOString(),
+    publishedRevision: e.publishedRevision
+      ? { id: e.publishedRevision.id, number: e.publishedRevision.number }
+      : null,
+  };
+}
 export function estimatorResource(
   e: Estimator & { publishedRevision: EstimatorRevision | null },
 ) {
@@ -25,7 +40,10 @@ export function estimatorResource(
   };
 }
 export function estimateResource(
-  e: Estimate & { revision: EstimatorRevision; lead: Lead | null },
+  e: Estimate & {
+    revision: Pick<EstimatorRevision, "id" | "number">;
+    lead: Pick<Lead, "id"> | null;
+  },
 ) {
   return {
     id: e.id,
@@ -58,5 +76,21 @@ export function webhookResource(w: WebhookEndpoint) {
     subscriptions: w.subscriptions,
     active: w.active,
     createdAt: w.createdAt.toISOString(),
+  };
+}
+
+export function estimateSummary(e: Parameters<typeof estimateResource>[0]) {
+  const result = e.result as unknown as EstimateResult;
+  return {
+    id: e.id,
+    estimatorId: e.estimatorId,
+    revision: { id: e.revision.id, number: e.revision.number },
+    status: e.status,
+    createdAt: e.createdAt.toISOString(),
+    leadId: e.lead?.id ?? null,
+    currency: result.currency,
+    minorUnits: result.minorUnits,
+    totalMinor: result.totalMinor,
+    ...(result.range ? { range: result.range } : {}),
   };
 }

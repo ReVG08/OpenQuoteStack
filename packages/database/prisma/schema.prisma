@@ -133,6 +133,7 @@ model Estimator {
   @@unique([id, organizationId])
   @@unique([publishedRevisionId, organizationId, id])
   @@index([organizationId, status])
+  @@index([organizationId, id])
 }
 model EstimatorRevision {
   id             String @id @default(cuid())
@@ -170,6 +171,7 @@ model Estimate {
   quoteSession   QuoteSession?
   @@unique([id, organizationId])
   @@index([organizationId, createdAt])
+  @@index([organizationId, id])
 }
 model Lead {
   id             String @id @default(cuid())
@@ -186,6 +188,7 @@ model Lead {
   estimate       Estimate @relation(fields: [estimateId, organizationId], references: [id, organizationId], onDelete: Restrict)
   @@unique([estimateId, organizationId])
   @@index([organizationId])
+  @@index([organizationId, id])
 }
 model AuditEntry {
   id             String @id @default(cuid())

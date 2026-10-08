@@ -1,13 +1,12 @@
 import { pricingTraces } from "./pricing-traces";
 import PDFDocument from "pdfkit";
-import { readFile } from "node:fs/promises";
 import sharp from "sharp";
 import type { Branding } from "@openquotestack/core";
 import type { Estimator } from "@openquotestack/schema";
 import type { EstimateResult } from "@openquotestack/engine";
 import { formatMoney, type Locale } from "./i18n";
 import { copy, dateLabel, localized, reference } from "./product-i18n";
-import { assetFile } from "./assets";
+import { assetKey, getAssetStorage } from "./assets";
 type PdfInput = {
   id: string;
   revisionNumber: number;
@@ -66,7 +65,9 @@ export async function estimatePdf(input: PdfInput): Promise<Buffer> {
     const match = b.logo.match(/^\/assets\/([^/]+)\/([^/]+)$/);
     if (match?.[1] === input.organizationId && match[2]) {
       try {
-        const png = await sharp(await readFile(assetFile(match[1], match[2])))
+        const png = await sharp(
+          await getAssetStorage().get(assetKey(match[1], match[2])),
+        )
           .png()
           .toBuffer();
         doc.image(png, doc.page.width - 188, 48, { fit: [140, 38] });

@@ -147,7 +147,7 @@ export default async function Analytics({
           <h2>{t("pipeline")}</h2>
           <div className="value-summary">
             {monetaryGroups(data.estimates).map((g) => (
-              <div key={g.currency}>
+              <div key={`${g.currency}:${g.minorUnits}`}>
                 <span>{g.currency}</span>
                 <strong>
                   {formatMoney(g.total, g.currency, g.minorUnits, locale)}

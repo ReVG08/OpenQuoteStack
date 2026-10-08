@@ -78,6 +78,7 @@ describe("API client", () => {
   it("rejects unsafe configuration and invalid responses", async () => {
     for (const baseUrl of [
       "http://quotes.example.com",
+      "https://quotes.example.com/unsupported-path",
       "https://key:secret@quotes.example.com",
       "https://quotes.example.com?key=x",
     ])

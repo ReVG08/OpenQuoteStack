@@ -41,7 +41,12 @@ export async function importDocument(
   try {
     if (source.length > 200000) throw new Error();
     const doc = parseDocument(JSON.parse(source));
-    const { estimator } = await services().createEstimator(actor, orgId, doc);
+    const { estimator } = await services().createEstimator(
+      actor,
+      orgId,
+      doc,
+      "import",
+    );
     revalidatePath(`/app/${orgId}`);
     return { ok: true, id: estimator.id };
   } catch {
@@ -165,7 +170,7 @@ export async function beginQuote(
   revisionId: string,
 ): Promise<MutationResult> {
   try {
-    publicAttempt("begin", `${slug}:${id}`, 600);
+    await publicAttempt("begin", `${slug}:${id}`, 600);
     const s = await services().beginPublicSession(slug, id, revisionId);
     return { ok: true, id: s.id };
   } catch {
@@ -177,7 +182,7 @@ export async function quoteProgress(
   step: number,
 ): Promise<MutationResult> {
   try {
-    publicAttempt("progress", token, 90);
+    await publicAttempt("progress", token, 90);
     await services().progressPublicSession(token, step);
     return { ok: true };
   } catch {
@@ -190,7 +195,7 @@ export async function submitQuote(
   contact?: unknown,
 ): Promise<MutationResult> {
   try {
-    publicAttempt("submit", token, 10);
+    await publicAttempt("submit", token, 10);
     const e = await services().submitPublicEstimate(token, answers, contact);
     return {
       ok: true,
@@ -206,7 +211,7 @@ export async function captureContact(
   contact: unknown,
 ): Promise<MutationResult> {
   try {
-    publicAttempt("contact", token, 10);
+    await publicAttempt("contact", token, 10);
     await services().capturePublicLead(token, contact);
     return { ok: true };
   } catch {

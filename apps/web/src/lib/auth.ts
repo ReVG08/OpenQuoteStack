@@ -13,6 +13,7 @@ export function createAuth(
     trustedOrigins: [config.url],
     emailAndPassword: {
       enabled: true,
+      disableSignUp: process.env.OQS_DISABLE_REGISTRATION === "true",
       minPasswordLength: 12,
       maxPasswordLength: 128,
     },
@@ -27,7 +28,38 @@ export function createAuth(
       useSecureCookies: secure,
       defaultCookieAttributes: { httpOnly: true, sameSite: "lax", secure },
     },
-    rateLimit: { enabled: true, window: 60, max: 60 },
+    rateLimit: { enabled: true, window: 60, max: 60, storage: "database" },
+    databaseHooks: {
+      session: {
+        create: {
+          after: async (session) => {
+            try {
+              const memberships = await database.membership.findMany({
+                where: { userId: session.userId },
+                select: { organizationId: true },
+              });
+              for (const member of memberships)
+                await database.auditEntry.create({
+                  data: {
+                    organizationId: member.organizationId,
+                    actorId: session.userId,
+                    action: "auth.login",
+                    resourceId: session.userId,
+                  },
+                });
+            } catch {
+              console.error(
+                JSON.stringify({
+                  level: "error",
+                  operation: "auth.audit",
+                  errorCategory: "audit_write_failed",
+                }),
+              );
+            }
+          },
+        },
+      },
+    },
     logger: { disabled: true },
   });
 }

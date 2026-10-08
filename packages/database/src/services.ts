@@ -622,6 +622,7 @@ export function createServices(db: PrismaClient, events = new EventBus()) {
       actor: Actor,
       organizationId: string,
       document: unknown,
+      source: "authored" | "import" = "authored",
     ) {
       const definition = parseDocument(document);
       return transaction(async (tx, pending) => {
@@ -661,6 +662,15 @@ export function createServices(db: PrismaClient, events = new EventBus()) {
           "estimator.revision_created",
           revision.id,
         );
+        if (source === "import")
+          await audit(
+            tx,
+            actor,
+            organizationId,
+            "template.imported",
+            estimator.id,
+            { schemaVersion: definition.schemaVersion },
+          );
         return { estimator, revision };
       });
     },

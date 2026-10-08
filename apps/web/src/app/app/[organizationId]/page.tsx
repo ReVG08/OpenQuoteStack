@@ -77,7 +77,7 @@ export default async function Dashboard({
           {groups.length > 0 && (
             <div className="value-summary">
               {groups.map((g) => (
-                <div key={g.currency}>
+                <div key={`${g.currency}:${g.minorUnits}`}>
                   <span>
                     {t("pipeline")} · {g.currency}
                   </span>

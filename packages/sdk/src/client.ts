@@ -2,6 +2,8 @@ import type {
   ListOptions,
   Page,
   EstimatorResource,
+  EstimatorSummary,
+  EstimateSummary,
   EstimateResource,
   LeadResource,
   CreateEstimate,
@@ -33,6 +35,7 @@ export class OpenQuoteStack {
   constructor(options: ClientOptions) {
     const url = new URL(options.baseUrl);
     if (
+      url.pathname !== "/" ||
       url.username ||
       url.password ||
       url.search ||
@@ -44,7 +47,7 @@ export class OpenQuoteStack {
         ))
     )
       throw new TypeError(
-        "baseUrl must use HTTPS or loopback HTTP without credentials, query or fragment",
+        "baseUrl must be an HTTPS origin or loopback HTTP origin",
       );
     if (!options.apiKey || /[\r\n]/.test(options.apiKey))
       throw new TypeError("apiKey is required");
@@ -131,12 +134,12 @@ export class OpenQuoteStack {
   }
   readonly estimators = {
     list: (options?: ListOptions) =>
-      this.list<EstimatorResource>("estimators", options),
+      this.list<EstimatorSummary>("estimators", options),
     get: (id: string) => this.get<EstimatorResource>("estimators", id),
   };
   readonly estimates = {
     list: (options?: ListOptions) =>
-      this.list<EstimateResource>("estimates", options),
+      this.list<EstimateSummary>("estimates", options),
     get: (id: string) => this.get<EstimateResource>("estimates", id),
     create: async (
       input: CreateEstimate,

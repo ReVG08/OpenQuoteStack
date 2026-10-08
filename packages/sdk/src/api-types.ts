@@ -36,6 +36,9 @@ export type EstimatorResource = {
     definition: EstimatorDocument;
   } | null;
 };
+export type EstimatorSummary = Omit<EstimatorResource, "publishedRevision"> & {
+  publishedRevision: { id: string; number: number } | null;
+};
 export type EstimateResource = {
   id: string;
   estimatorId: string;
@@ -45,6 +48,12 @@ export type EstimateResource = {
   answers: Answers;
   result: EstimateResult;
   leadId: string | null;
+};
+export type EstimateSummary = Omit<EstimateResource, "answers" | "result"> & {
+  currency: string;
+  minorUnits: number;
+  totalMinor: number;
+  range?: { minMinor: number; maxMinor: number };
 };
 export type LeadResource = Contact & {
   id: string;
