@@ -189,6 +189,15 @@ export function createServices(db: PrismaClient, events = new EventBus()) {
                   createdBy: actor.userId,
                 },
               });
+        if (revision.id !== latest.id)
+          await record(
+            tx,
+            pending,
+            actor,
+            organizationId,
+            "estimator.revision_created",
+            revision.id,
+          );
         await tx.estimator.update({
           where: { id: estimatorId },
           data: { status: "published", publishedRevisionId: revision.id },
@@ -287,7 +296,7 @@ export function createServices(db: PrismaClient, events = new EventBus()) {
             startedAt: true,
             completedAt: true,
             lastStep: true,
-            revision: { select: { definition: true } },
+            revision: { select: { id: true, number: true, definition: true } },
           },
         });
         const estimates = await tx.estimate.findMany({

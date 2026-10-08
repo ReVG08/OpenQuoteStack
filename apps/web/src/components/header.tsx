@@ -1,3 +1,4 @@
+import { DocumentLanguage } from "./document-language";
 import Link from "next/link";
 import { ThemeToggle } from "./theme-toggle";
 import { messages, type Locale } from "@/lib/i18n";
@@ -5,6 +6,7 @@ export function Header({ locale }: { locale: Locale }) {
   const t = messages(locale);
   return (
     <header lang={locale}>
+      <DocumentLanguage locale={locale} />
       <Link className="brand" href={`/?lang=${locale}`}>
         <span className="brand-mark">O</span>OpenQuoteStack
       </Link>

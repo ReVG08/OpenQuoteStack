@@ -133,15 +133,26 @@ export const messages = (locale: Locale) => (locale === "pt-BR" ? pt : en);
 export const getLocale = (value: unknown): Locale =>
   value === "pt-BR" ? "pt-BR" : "en";
 export function formatMoney(
-  amountMinor: number,
+  amountMinor: number | bigint,
   currency: string,
   minorUnits: number,
   locale: Locale,
 ) {
+  const amount = BigInt(amountMinor),
+    scale = 10n ** BigInt(minorUnits);
+  const whole = amount / scale,
+    fraction = (amount < 0n ? -amount : amount) % scale;
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     minimumFractionDigits: minorUnits,
     maximumFractionDigits: minorUnits,
-  }).format(amountMinor / 10 ** minorUnits);
+  })
+    .formatToParts(whole === 0n && amount < 0n ? -0 : whole)
+    .map((part) =>
+      part.type === "fraction"
+        ? fraction.toString().padStart(minorUnits, "0")
+        : part.value,
+    )
+    .join("");
 }

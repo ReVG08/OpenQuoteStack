@@ -6,7 +6,12 @@ const envPath = resolve(import.meta.dirname, "../../.env");
 if (existsSync(envPath)) loadEnvFile(envPath);
 const config: NextConfig = {
   agentRules: false,
+  logging: { serverFunctions: false },
   output: "standalone",
+  serverExternalPackages: ["pdfkit", "sharp"],
+  outputFileTracingExcludes: {
+    "/*": ["**/.env*", "**/.local/**", "**/.git/**"],
+  },
   outputFileTracingRoot: resolve(import.meta.dirname, "../.."),
   transpilePackages: ["@openquotestack/database", "@openquotestack/ui"],
   async headers() {

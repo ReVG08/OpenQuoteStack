@@ -13,10 +13,12 @@ export default async function Demo({
   return (
     <>
       <Header locale={locale} />
-      <main lang={locale}>
+      <main lang={locale} className="narrow">
         <h1>{t.preview}</h1>
         <p>{t.previewHelp}</p>
-        <Calculator estimator={parseEstimator(sample)} locale={locale} />
+        <div className="runtime-card">
+          <Calculator estimator={parseEstimator(sample)} locale={locale} />
+        </div>
       </main>
     </>
   );

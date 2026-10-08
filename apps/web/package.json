@@ -9,19 +9,25 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "next": "16.3.8",
-    "react": "19.3.0",
-    "react-dom": "19.3.0",
-    "better-auth": "1.7.7",
     "@better-auth/prisma-adapter": "1.7.7",
-    "zod": "4.6.5",
-    "@openquotestack/schema": "workspace:*",
-    "@openquotestack/engine": "workspace:*",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
     "@openquotestack/core": "workspace:*",
     "@openquotestack/database": "workspace:*",
-    "@openquotestack/ui": "workspace:*"
+    "@openquotestack/engine": "workspace:*",
+    "@openquotestack/schema": "workspace:*",
+    "@openquotestack/ui": "workspace:*",
+    "better-auth": "1.7.7",
+    "next": "16.3.8",
+    "pdfkit": "^0.20.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "sharp": "^0.35.5",
+    "zod": "4.6.5"
   },
   "devDependencies": {
+    "@types/pdfkit": "^0.17.6",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0"
   },
