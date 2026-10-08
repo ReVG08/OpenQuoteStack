@@ -255,6 +255,22 @@ const words = {
   ],
   restore: ["Publish this revision", "Publicar esta revisão"],
   working: ["Working…", "Processando…"],
+  importExtension: [
+    "Choose a .oqs.json file.",
+    "Escolha um arquivo .oqs.json.",
+  ],
+  importSize: [
+    "The file must be smaller than 200 KB.",
+    "O arquivo deve ter menos de 200 KB.",
+  ],
+  importJson: [
+    "The file contains invalid JSON. Check its syntax before importing.",
+    "O arquivo contém JSON inválido. Confira a sintaxe antes de importar.",
+  ],
+  importVersion: [
+    "This installation supports schema version 1. Use a compatible export.",
+    "Esta instalação aceita a versão 1 do esquema. Use uma exportação compatível.",
+  ],
   importError: [
     "Choose a valid schema-version 1 .oqs.json file. Pricing and references must be valid.",
     "Escolha um arquivo .oqs.json válido da versão 1. Preços e referências precisam ser válidos.",

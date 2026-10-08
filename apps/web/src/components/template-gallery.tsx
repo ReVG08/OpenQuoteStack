@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@openquotestack/ui";
+import { parseDocument } from "@openquotestack/schema";
 import { templateDocuments } from "@/lib/templates";
 import { localized, copy } from "@/lib/product-i18n";
 import type { Locale } from "@/lib/i18n";
@@ -126,14 +127,45 @@ export function TemplateGallery({
                 if (!file) return;
                 event.target.value = "";
                 startTransition(async () => {
+                  setError("");
+                  if (!file.name.endsWith(".oqs.json")) {
+                    setError(t("importExtension"));
+                    return;
+                  }
+                  if (file.size > 200000) {
+                    setError(t("importSize"));
+                    return;
+                  }
+                  let source: string;
+                  let value: unknown;
                   try {
-                    if (!file.name.endsWith(".oqs.json") || file.size > 200000)
-                      throw new Error();
-                    const r = await importDocument(orgId, await file.text());
+                    source = await file.text();
+                    value = JSON.parse(source);
+                  } catch {
+                    setError(t("importJson"));
+                    return;
+                  }
+                  if (
+                    typeof value !== "object" ||
+                    value === null ||
+                    !("schemaVersion" in value) ||
+                    value.schemaVersion !== "1"
+                  ) {
+                    setError(t("importVersion"));
+                    return;
+                  }
+                  try {
+                    parseDocument(value);
+                  } catch {
+                    setError(t("importError"));
+                    return;
+                  }
+                  try {
+                    const r = await importDocument(orgId, source);
                     if (!r.id) throw new Error();
                     router.push(`/app/${orgId}/estimators/${r.id}`);
                   } catch {
-                    setError(t("importError"));
+                    setError(t("failure"));
                   }
                 });
               }}
