@@ -5,7 +5,11 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./services": "./src/services.ts"
+    "./services": "./src/services.ts",
+    "./platform": "./src/platform.ts",
+    "./worker": "./src/worker.ts",
+    "./network": "./src/network.ts",
+    "./storage": "./src/storage.ts"
   },
   "scripts": {
     "generate": "prisma generate",
@@ -14,17 +18,22 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "7.10.0",
-    "@prisma/adapter-pg": "7.10.0",
-    "pg": "^8.18.0",
-    "@openquotestack/schema": "workspace:*",
-    "@openquotestack/engine": "workspace:*",
+    "@aws-sdk/client-s3": "^3.1147.0",
     "@openquotestack/core": "workspace:*",
-    "dotenv": "^17.3.0"
+    "@openquotestack/engine": "workspace:*",
+    "@openquotestack/schema": "workspace:*",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "dotenv": "^17.3.0",
+    "ipaddr.js": "^2.5.0",
+    "nodemailer": "^10.0.16",
+    "pg": "^8.18.0",
+    "zod": "4.6.5"
   },
   "devDependencies": {
-    "prisma": "7.10.0",
-    "@types/pg": "^8.16.0"
+    "@types/nodemailer": "^8.0.2",
+    "@types/pg": "^8.16.0",
+    "prisma": "7.10.0"
   },
   "license": "AGPL-3.0-only"
 }

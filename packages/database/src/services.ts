@@ -1,28 +1,17 @@
+import { enqueueEvent } from "./outbox";
 import { createHash, randomUUID } from "node:crypto";
 import {
-  hasPermission,
   organizationInputSchema,
   contactSchema,
   EventBus,
   type DomainEvent,
-  type Permission,
 } from "@openquotestack/core";
 import { parseDocument, type Answers } from "@openquotestack/schema";
 import { calculateEstimate } from "@openquotestack/engine";
 import { Prisma, type PrismaClient } from "./index";
-export class AccessDeniedError extends Error {
-  constructor() {
-    super("Resource not found or access denied");
-    this.name = "AccessDeniedError";
-  }
-}
-export class ConflictError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "ConflictError";
-  }
-}
-export type Actor = { userId: string };
+import { AccessDeniedError, ConflictError, type Actor } from "./errors";
+export { AccessDeniedError, ConflictError, type Actor } from "./errors";
+import { authorize, audit } from "./access";
 type Transaction = Prisma.TransactionClient;
 const json = (value: unknown): Prisma.InputJsonValue =>
   JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
@@ -38,21 +27,6 @@ const canonical = (v: unknown): string =>
 
 /** Server-only services. Actor identifiers must come from a verified session. */
 export function createServices(db: PrismaClient, events = new EventBus()) {
-  async function authorize(
-    tx: Transaction,
-    actor: Actor,
-    organizationId: string,
-    permission: Permission,
-  ) {
-    const membership = await tx.membership.findUnique({
-      where: {
-        organizationId_userId: { organizationId, userId: actor.userId },
-      },
-    });
-    if (!membership || !hasPermission(membership.role, permission))
-      throw new AccessDeniedError();
-    return membership;
-  }
   async function transaction<T>(
     operation: (tx: Transaction, pending: DomainEvent[]) => Promise<T>,
   ): Promise<T> {
@@ -86,6 +60,7 @@ export function createServices(db: PrismaClient, events = new EventBus()) {
     await tx.auditEntry.create({
       data: { organizationId, actorId: actor.userId, action: name, resourceId },
     });
+    await enqueueEvent(tx, organizationId, name, resourceId);
     pending.push({
       id: randomUUID(),
       name,
@@ -113,6 +88,13 @@ export function createServices(db: PrismaClient, events = new EventBus()) {
         throw new AccessDeniedError();
       return transaction(async (tx) => {
         await authorize(tx, actor, organizationId, "organization.manage");
+        await audit(
+          tx,
+          actor,
+          organizationId,
+          "organization.configuration_updated",
+          organizationId,
+        );
         return tx.organization.update({
           where: { id: organizationId },
           data: { ...data, branding: json(data.branding) },
@@ -147,6 +129,17 @@ export function createServices(db: PrismaClient, events = new EventBus()) {
           throw new ConflictError(
             "The draft changed in another window. Reload before saving.",
           );
+        await audit(
+          tx,
+          actor,
+          organizationId,
+          "estimator.draft_saved",
+          estimatorId,
+          {
+            version: version + 1,
+            pricingRules: definition.estimator.rules.length,
+          },
+        );
         return version + 1;
       });
     },
@@ -390,6 +383,7 @@ export function createServices(db: PrismaClient, events = new EventBus()) {
           slug: e.organization.slug,
           locale: e.organization.locale,
           branding: e.organization.branding,
+          embedOrigins: e.organization.embedOrigins,
         },
       };
     },

@@ -95,6 +95,15 @@ model Organization {
   auditEntries    AuditEntry[]
   quoteSessions   QuoteSession[]
   activities      EstimateActivity[]
+  apiSubmissions ApiSubmission[]
+  apiKeys         ApiKey[]
+  outboxEvents    OutboxEvent[]
+  webhooks        WebhookEndpoint[]
+  deliveries      WebhookDelivery[]
+  jobs            BackgroundJob[]
+  domains         CustomDomain[]
+  notifications   Json @default("{}")
+  embedOrigins    String[] @default([])
 }
 model Membership {
   id             String @id @default(cuid())
@@ -157,6 +166,7 @@ model Estimate {
   revision       EstimatorRevision @relation(fields: [revisionId, organizationId, estimatorId], references: [id, organizationId, estimatorId], onDelete: Restrict)
   lead           Lead?
   activities     EstimateActivity[]
+  apiSubmissions ApiSubmission[]
   quoteSession   QuoteSession?
   @@unique([id, organizationId])
   @@index([organizationId, createdAt])
@@ -181,6 +191,7 @@ model AuditEntry {
   id             String @id @default(cuid())
   organizationId String
   actorId        String
+  metadata       Json @default("{}")
   action         String
   resourceId     String
   createdAt      DateTime @default(now())
@@ -215,4 +226,128 @@ model EstimateActivity {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
   estimate       Estimate @relation(fields: [estimateId, organizationId], references: [id, organizationId], onDelete: Restrict)
   @@index([organizationId, estimateId, createdAt])
+}
+
+model ApiKey {
+  id             String @id @default(cuid())
+  organizationId String
+  name           String
+  description    String?
+  prefix         String
+  secretHash     String @unique
+  scopes         String[]
+  createdAt      DateTime @default(now())
+  lastUsedAt     DateTime?
+  revokedAt      DateTime?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  submissions ApiSubmission[]
+  @@unique([id, organizationId])
+  @@index([organizationId, createdAt])
+}
+model OutboxEvent {
+  id             String @id @default(uuid())
+  organizationId String
+  name           String
+  resourceId     String
+  payload        Json
+  createdAt      DateTime @default(now())
+  dispatchedAt   DateTime?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  deliveries     WebhookDelivery[]
+  @@unique([id, organizationId])
+  @@index([dispatchedAt, createdAt])
+}
+model WebhookEndpoint {
+  id              String @id @default(cuid())
+  organizationId  String
+  url             String
+  subscriptions   String[]
+  secretEncrypted String
+  active          Boolean @default(true)
+  createdAt       DateTime @default(now())
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  deliveries      WebhookDelivery[]
+  @@unique([id, organizationId])
+  @@index([organizationId, active])
+}
+model WebhookDelivery {
+  id             String @id @default(cuid())
+  organizationId String
+  endpointId     String
+  eventId        String
+  status         String @default("pending")
+  attempts       Int @default(0)
+  responseCode   Int?
+  durationMs     Int?
+  errorCategory  String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  endpoint       WebhookEndpoint @relation(fields: [endpointId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  event          OutboxEvent @relation(fields: [eventId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  @@unique([endpointId, eventId])
+  @@index([organizationId, createdAt])
+}
+model BackgroundJob {
+  id             String @id @default(cuid())
+  organizationId String
+  kind           String
+  payload        Json
+  dedupeKey      String @unique
+  status         String @default("pending")
+  attempts       Int @default(0)
+  availableAt    DateTime @default(now())
+  lockedUntil    DateTime?
+  lockToken      String?
+  errorCategory  String?
+  createdAt      DateTime @default(now())
+  finishedAt     DateTime?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  @@index([status, availableAt])
+  @@index([organizationId, createdAt])
+}
+model WorkerHeartbeat {
+  id         String @id
+  updatedAt  DateTime @updatedAt
+}
+model CustomDomain {
+  id             String @id @default(cuid())
+  organizationId String
+  hostname       String @unique
+  verifyToken    String
+  status         String @default("pending")
+  errorCategory  String?
+  verifiedAt     DateTime?
+  checkedAt      DateTime?
+  createdAt      DateTime @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  @@index([organizationId])
+}
+model RateBucket {
+  key        String @id
+  count      Int @default(0)
+  expiresAt  DateTime
+  @@index([expiresAt])
+}
+model ApiSubmission {
+  id             String @id @default(cuid())
+  organizationId String
+  keyId          String
+  requestKey     String
+  requestHash    String
+  estimateId     String
+  createdAt      DateTime @default(now())
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  key ApiKey @relation(fields: [keyId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  estimate Estimate @relation(fields: [estimateId, organizationId], references: [id, organizationId], onDelete: Restrict)
+  @@unique([keyId, requestKey])
+  @@index([organizationId])
+}
+
+model RateLimit {
+ id String @id
+ key String @unique
+ count Int
+ lastRequest BigInt
+ @@index([lastRequest])
 }

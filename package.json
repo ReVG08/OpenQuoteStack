@@ -21,7 +21,10 @@
     "example": "turbo build --filter=@openquotestack/engine && tsx examples/calculate-moving.ts",
     "test:database": "pnpm db:generate && turbo build --filter=@openquotestack/engine --filter=@openquotestack/core && tsx scripts/test-database.ts",
     "db:local": "tsx scripts/local-database.ts",
-    "typecheck:tools": "tsc --noEmit -p tsconfig.tools.json"
+    "typecheck:tools": "tsc --noEmit -p tsconfig.tools.json",
+    "worker": "pnpm db:generate && tsx scripts/worker.ts",
+    "setup:env": "tsx scripts/setup-env.ts",
+    "templates:validate": "turbo build --filter=@openquotestack/schema && tsx scripts/validate-templates.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
@@ -30,11 +33,13 @@
     "@openquotestack/schema": "workspace:*",
     "@openquotestack/sdk": "workspace:*",
     "@types/node": "^24.0.0",
+    "@types/smtp-server": "^3.5.13",
     "agent-browser": "^0.38.2",
     "embedded-postgres": "18.4.0-beta.17",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.3.8",
     "prettier": "^3.8.0",
+    "smtp-server": "^3.19.17",
     "tsx": "^4.21.0",
     "turbo": "^2.8.0",
     "typescript": "^5.9.0",

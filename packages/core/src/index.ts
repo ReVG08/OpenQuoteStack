@@ -134,3 +134,5 @@ export const contactSchema = z.strictObject({
   address: z.string().max(500).optional(),
   notes: z.string().max(2000).optional(),
 });
+
+export { formatMoney } from "./money";
